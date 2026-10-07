@@ -112,12 +112,6 @@ function archiveThemeFamilySettings(string $path): array
             $out['hitsave_color_mode'] = $mode;
         }
     }
-    if (preg_match('/^\s*logo_url:\s*([^\r\n]*)/m', $yaml, $m)) {
-        $url = trim($m[1], " \t\"'");
-        if ($url !== '' && strtolower($url) !== 'null' && preg_match('#^(https?://|/)#', $url)) {
-            $out['hitsave_logo_url'] = $url;
-        }
-    }
     if (preg_match('/^\s*hero_title:\s*(.+)$/m', $yaml, $m)) {
         $out['hitsave_hero_title'] = trim($m[1], " \t\"'");
     }
@@ -151,7 +145,6 @@ function applyThemeSettings($themes, $siteSettings, $blockLayoutManager, int $si
         'nav_depth' => $settings['nav_depth'] ?? 0,
         'footer' => $settings['footer'] ?? '',
         'hitsave_color_mode' => $settings['hitsave_color_mode'] ?? null,
-        'hitsave_logo_url' => $settings['hitsave_logo_url'] ?? null,
         'hitsave_org_url' => $settings['hitsave_org_url'] ?? null,
         'hitsave_preserve_url' => $settings['hitsave_preserve_url'] ?? null,
         'hitsave_support_url' => $settings['hitsave_support_url'] ?? null,
@@ -168,9 +161,7 @@ function applyThemeSettings($themes, $siteSettings, $blockLayoutManager, int $si
             unset($merged[$settingKey]);
         }
     }
-    if (!isset($settings['hitsave_logo_url'])) {
-        unset($merged['hitsave_logo_url']);
-    }
+    unset($merged['hitsave_logo_url']);
     if (!empty($settings['resource_page_blocks'])) {
         $merged['resource_page_blocks'] = $blockLayoutManager->standardizeResourcePageBlocks(
             $settings['resource_page_blocks']

@@ -114,9 +114,9 @@ docker compose run --rm omeka-uploader game-name /config/preservation/game.yml
 
 The uploader sends the tar over the Omeka REST API (multipart), ingester **`omeka_dip_package`**, honors **`config/omeka-uploader.yaml`** (site slug, item set, default visibility), may attach Moby fields from the ledger, and stores Omeka item/media ids on `game_ingest`. Batch jobs use the same service via `scripts/run-batch-resume-omeka.sh` in the archiver repo.
 
-### Batch E2E (many games, tank `/output`)
+### Batch E2E (many games)
 
-For **S/T repcopy batches**, **pilot WoG1**, or DIPs already under **`/tank/hitsave-archiver/output`**, follow **[hitsave-archiver `docs/e2e-preservation-batch.md`](https://github.com/hitsave/hitsave-archiver/blob/main/docs/e2e-preservation-batch.md)** (`run-batch-resume-omeka.sh`, `upload-manifest-dips-omeka.sh`, `--ingest-only`).
+For **S/T repcopy batches**, **pilot WoG1**, or DIPs already on the host **`HOST_OUTPUT`** tree, follow **[hitsave-archiver `docs/e2e-preservation-batch.md`](https://github.com/hitsave/hitsave-archiver/blob/main/docs/e2e-preservation-batch.md)** (`run-batch-resume-omeka.sh`, `upload-manifest-dips-omeka.sh`, `--ingest-only`).
 
 ---
 

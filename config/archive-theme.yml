@@ -5,10 +5,6 @@ appearance:
   # Default for new visitors; browser toggle overrides (localStorage).
   color_mode: dark
 
-brand:
-  # Bundled in theme as asset/img/hit-save-wordmark.png (same wordmark as hitsave.org). Override if needed.
-  logo_url:
-
 family:
   org_url: https://hitsave.org
   preserve_url: https://preserve.games
