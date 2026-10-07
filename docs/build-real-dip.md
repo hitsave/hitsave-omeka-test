@@ -83,11 +83,11 @@ Ingest + upload in one step (from **hitsave-omeka-test**, uses archiver `game.ym
 ./scripts/shell/ingest-and-upload-dip.sh
 ```
 
-The uploader uses the Omeka **REST API** (multipart), the **DIP package (browse in place)** ingester, **`config/omeka-uploader.yaml`** (site slug, item set, default visibility), optional **Moby** fields from the ledger, and records **omeka_item_id** / **omeka_media_id** on `game_ingest`. Batch runs use the same uploader via `scripts/run-batch-resume-omeka.sh`.
+The uploader uses the Omeka **REST API** (multipart), ingester **`omeka_dip_package`**, **`config/omeka-uploader.yaml`** (site slug, item set, default visibility), optional **Moby** fields from the ledger, and records **omeka_item_id** / **omeka_media_id** on `game_ingest`. Batch runs use the same uploader via `scripts/run-batch-resume-omeka.sh`.
 
 ## Verify
 
-- Admin: `{public_url}/admin` — item with ingester **DIP package (browse in place)** (test config usually keeps uploads **private** until you publish).
+- Admin: `{public_url}/admin` — item whose media used ingester **`omeka_dip_package`** (Admin may show the label “DIP package (browse in place)”; test config usually keeps uploads **private** until you publish).
 - Public site: `{public_url}/s/hitsave-test/...` (see `config/omeka-test/settings.yaml`).
 
 ## Legacy: in-container upload script
