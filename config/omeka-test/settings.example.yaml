@@ -9,13 +9,14 @@ database:
   root_password: change_me_root_password
 
 omeka:
-  # Use one URL consistently in the browser (CSRF/session). Match docker publish port (8088).
+  # Use one URL consistently in the browser (CSRF/session). Match how you reach this host (port 8088).
   public_url: http://127.0.0.1:8088
   admin_email: admin@example.com
   admin_name: Admin
   admin_password: change_me_admin_password
   site_title: Hit Save! Archive (test)
   site_slug: hitsave-test
+  theme: HitSaveArchive
   item_set_title: Press and Marketing Materials
 
 # REST clients (local Python in this repo). hitsave-archiver omeka-uploader uses
