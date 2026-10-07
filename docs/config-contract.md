@@ -4,7 +4,7 @@
 
 | Topic | File | Notes |
 |-------|------|--------|
-| Admin, DB, public URL, site slug, theme/DIP module tuning | **`config/omeka-test/settings.yaml`** (from [`settings.example.yaml`](../config/omeka-test/settings.example.yaml)) | Merged with optional `settings.local.yaml`; rendered to `generated.env` by [`sync-docker-config.py`](../scripts/shell/sync-docker-config.py) |
+| Admin, DB, public URL, site slug, **`dip_viewer:`** module file defaults | **`config/omeka-test/settings.yaml`** (from [`settings.example.yaml`](../config/omeka-test/settings.example.yaml)) | Merged with optional `settings.local.yaml`; rendered to `generated.env` by [`sync-docker-config.py`](../scripts/shell/sync-docker-config.py). `dip_viewer` keys match [omeka-dip-viewer `DipConfig`](https://github.com/hitsave/omeka-dip-viewer/blob/main/src/Service/DipConfig.php) / [config-contract](https://github.com/hitsave/omeka-dip-viewer/blob/main/docs/config-contract.md). |
 | REST API for **local Python tools** | **`settings.yaml` → `api:`** | `site_slug` / `item_set_title` default from `omeka:` when omitted |
 | Prod mirror source | **`config/omeka-test/omeka-prod-source.yaml`** (from example) | `mirror.target_site_slug` should match `omeka.site_slug` |
 | Sample item copy | **`config/omeka-test/sample-from-prod.yaml`** | Points at `local.settings` for API identity |
