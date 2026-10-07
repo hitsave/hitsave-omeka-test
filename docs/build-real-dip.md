@@ -12,13 +12,13 @@ hitsave-archiver-config/   # private secrets + database.yaml
 hitsave-omeka-test/        # this repo — Omeka on :8088
 ```
 
-On Saturn, typical host paths:
+On your host, example paths (adjust to your layout):
 
 | Variable | Example |
 |----------|---------|
 | `HOST_PRESS_MATERIAL` | `/tank2/press-material` |
 | `HOST_OUTPUT` / `DIP_OUTPUT_ROOT` | `/tank/hitsave-archiver/output` |
-| `HITSAVE_PRIVATE_CONFIG` | `/home/jonas/hitsave-archiver-config` |
+| `HITSAVE_PRIVATE_CONFIG` | `../hitsave-archiver-config` (or an absolute path) |
 
 Start preservation services and the test Omeka stack:
 

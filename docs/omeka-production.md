@@ -6,7 +6,7 @@ This document captures how [archive.hitsave.org](https://archive.hitsave.org) is
 
 | | Production | Test (this repo) |
 |---|------------|----------------------|
-| URL | https://archive.hitsave.org | `config/omeka-test/settings.yaml` → `omeka.public_url` (e.g. `http://10.1.1.60:8088`) |
+| URL | https://archive.hitsave.org | `config/omeka-test/settings.yaml` → `omeka.public_url` (e.g. `http://127.0.0.1:8088`) |
 | Site slug | `start` | `hitsave-test` (configurable) |
 | DIP browse | Legacy: many native media + LightGallery; **target:** one DIP `.tar` per game via **OmekaDipViewer** | OmekaDipViewer only |
 | ARKs | **Ark** module active | **Common + Ark** in test image (Ark 3.5.17; prod 3.5.15), NAAN **78322**, internal ids; resolver URL **`/s/{site_slug}/ark:/…`** (prod serves **`/ark:/…`** at host root) |
@@ -95,7 +95,7 @@ We use two qualifier mechanisms from the ARK spec ([ARK spec](https://arks.org/a
 
 `{public_url}/s/{site_slug}/ark:/78322/{item_id}/{dip_media_id}/{file_key}[.{variant}]`
 
-Example (test stack): `http://10.1.1.60:8088/s/hitsave-test/ark:/78322/201/202/f0` → `screenshot.jpg` bytes (same as `/omeka-dip/file/202/f0`). Variants use the ARK variant suffix, e.g. `…/f2.access` for a streaming copy.
+Example (test stack): `http://127.0.0.1:8088/s/hitsave-test/ark:/78322/201/202/f0` → `screenshot.jpg` bytes (same as `/omeka-dip/file/202/f0`). Variants use the ARK variant suffix, e.g. `…/f2.access` for a streaming copy.
 
 Production still serves **`/ark:/…`** at the host root; test uses the **`/s/{site_slug}/ark:`** prefix until root routing matches prod. Item and single-segment media ARKs remain the Ark module; in-tar files use the **four-segment** path above (not a second minted Name).
 
