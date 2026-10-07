@@ -32,6 +32,7 @@ docker compose exec -T -u root omeka php /scripts/ensure-omeka-test-site.php || 
 docker compose exec -T -u root omeka php /scripts/ensure-press-item-set.php || true
 docker compose exec -T -u root omeka php /scripts/ensure-press-material-site-page.php || true
 docker compose exec -T -u root omeka php /scripts/ensure-batch-listing-site-page.php || true
+docker compose exec -T -u root omeka php /scripts/ensure-test-items-public.php || true
 
 echo "Admin: ${PUBLIC_URL}/admin (see config/omeka-test/settings.yaml for credentials)"
 echo "Ingest + upload: docs/build-real-dip.md (docker compose in hitsave-archiver; source host.env from archiver-config)"

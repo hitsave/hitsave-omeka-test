@@ -24,7 +24,7 @@ omeka:
 api:
   base_url: http://host.docker.internal:8088/api
   credentials_file: secrets/omeka-api-credentials-local.yaml
-  default_is_public: false
+  default_is_public: true
   production_item_set_id: 1459
   dip_ingester: omeka_dip_package
 

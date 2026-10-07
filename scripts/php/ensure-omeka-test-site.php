@@ -70,11 +70,15 @@ applyThemeSettings($themes, $siteSettings, $blockLayoutManager, $siteId, $theme,
 
 $homepage = ensureSiteHomepageHub($api, $siteId, '/config/archive-theme.yml');
 
+$globalSettings = $services->get('Omeka\Settings');
+$globalSettings->set('default_site', $siteId);
+
 echo json_encode([
     'site_id' => $siteId,
     'slug' => $slug,
     'theme' => $theme,
     'created' => $created,
+    'default_site_id' => $siteId,
     'resource_page_blocks' => hitsaveDefaultResourcePageBlocks(),
     'homepage' => $homepage,
 ], JSON_PRETTY_PRINT) . "\n";

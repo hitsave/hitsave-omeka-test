@@ -26,7 +26,11 @@ $titleProperty = $api->search('properties', ['term' => 'dcterms:title'])->getCon
 
 $existing = $api->search('item_sets', ['title' => $title])->getContent();
 if ($existing) {
-    echo json_encode(['item_set_id' => $existing[0]->id(), 'title' => $title, 'created' => false], JSON_PRETTY_PRINT) . "\n";
+    $setId = $existing[0]->id();
+    if (!$existing[0]->isPublic()) {
+        $api->update('item_sets', $setId, ['o:is_public' => true], [], ['isPartial' => true]);
+    }
+    echo json_encode(['item_set_id' => $setId, 'title' => $title, 'created' => false, 'is_public' => true], JSON_PRETTY_PRINT) . "\n";
     exit(0);
 }
 
@@ -36,7 +40,7 @@ $itemSet = $api->create('item_sets', [
         'type' => 'literal',
         '@value' => $title,
     ]],
-    'o:is_public' => false,
+    'o:is_public' => true,
 ])->getContent();
 
 echo json_encode(['item_set_id' => $itemSet->id(), 'title' => $title, 'created' => true], JSON_PRETTY_PRINT) . "\n";
