@@ -106,7 +106,7 @@ This updates the Postgres ledger for `game_key` and writes **`$HOST_OUTPUT/dip/<
 
 ### 3. Upload to test Omeka
 
-Test Omeka must already be running (setup **B**). From the same archiver directory:
+Test Omeka must already be running (setup **B**). **`run-omeka-test.sh`** creates the **Press and Marketing Materials** item set (`ensure-press-item-set.php`) expected by **`config/omeka-uploader.yaml`**. From the same archiver directory:
 
 ```bash
 docker compose run --rm omeka-uploader game-name /config/preservation/game.yml

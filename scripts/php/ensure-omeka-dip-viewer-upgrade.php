@@ -35,6 +35,19 @@ $dbEntity = $entityManager->find(ModuleEntity::class, 'OmekaDipViewer');
 $dbVersion = $dbEntity ? (string) $dbEntity->getVersion() : '';
 
 $state = $module->getState();
+if ($state === 'not_installed') {
+    $result = [
+        'module' => 'OmekaDipViewer',
+        'state' => $state,
+        'ini_version' => $iniVersion,
+        'db_version' => $dbVersion,
+        'deactivated_modules' => $deactivated,
+        'upgraded' => false,
+        'skipped' => 'not_installed',
+    ];
+    echo json_encode($result) . "\n";
+    exit(0);
+}
 $needsVersionSync = $iniVersion !== '' && $iniVersion !== $dbVersion;
 $shouldUpgrade = $state === 'needs_upgrade' || $needsVersionSync;
 
