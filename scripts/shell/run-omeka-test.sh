@@ -32,4 +32,4 @@ docker compose exec -T -u root omeka php /scripts/ensure-batch-listing-site-page
 
 PUBLIC_URL="$(python3 -c "import yaml; print(yaml.safe_load(open('$ROOT/config/omeka-test/settings.yaml'))['omeka'].get('public_url','http://localhost:8088').rstrip('/'))")"
 echo "Admin: ${PUBLIC_URL}/admin (see config/omeka-test/settings.yaml for credentials)"
-echo "Build a real DIP: docs/build-real-dip.md (hitsave-archiver game.yml + ingest-and-attach-dip.sh)"
+echo "Build a real DIP: docs/build-real-dip.md (hitsave-archiver game.yml + ingest-and-upload-dip.sh)"

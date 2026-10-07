@@ -1,6 +1,6 @@
 <?php
 /**
- * Create an Omeka item with a fixture DIP (runs inside the Omeka container).
+ * Create an Omeka item with a preservation DIP tar (runs inside the Omeka container).
  *
  * Usage: php scripts/create-dip-example-item.php /dip-output/game.tar [title]
  */

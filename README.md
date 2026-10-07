@@ -1,6 +1,6 @@
 # hitsave-omeka-test
 
-Local **Omeka S** stack for HitSave archive QA: **HitSaveArchive** theme, **OmekaDipViewer**, and prod mirror scripts. **E-ARK DIPs come from real preservation ingest** in sibling [**hitsave-archiver**](https://github.com/hitsave/hitsave-archiver), not from bundled fixture tars.
+Local **Omeka S** stack for HitSave archive QA: **HitSaveArchive** theme, **OmekaDipViewer**, and prod mirror scripts. **E-ARK DIPs come from real preservation ingest** in sibling [**hitsave-archiver**](https://github.com/hitsave/hitsave-archiver), then upload via the same **omeka-uploader** used in production.
 
 ## Layout
 
@@ -24,23 +24,19 @@ cd hitsave-omeka-test
 
 Admin URL and password: `config/omeka-test/settings.yaml` (`omeka.public_url`, `omeka.admin_password`).
 
-## Build a real DIP and upload it to test Omeka
+## Build a real DIP and upload to test Omeka
 
 Full walkthrough: **[docs/build-real-dip.md](docs/build-real-dip.md)**.
 
-Short path (after `game.yml` exists in **hitsave-archiver**):
+After `game.yml` exists in **hitsave-archiver**:
 
 ```bash
-./scripts/shell/ingest-and-attach-dip.sh
+./scripts/shell/ingest-and-upload-dip.sh
 ```
 
-Or ingest in archiver, then upload an existing tar from the output volume (QA script; production-like upload uses archiver `omeka-uploader` — see the doc):
+Or ingest then upload separately with `docker compose run … omeka-uploader` (see doc).
 
-```bash
-./scripts/shell/attach-dip-from-output.sh my-game.tar "My Game — press materials"
-```
-
-Compose mounts `${DIP_OUTPUT_ROOT:-/tank/hitsave-archiver/output}/dip` at `/dip-output` inside Omeka.
+Compose mounts `${DIP_OUTPUT_ROOT:-/tank/hitsave-archiver/output}/dip` at `/dip-output` inside Omeka (read-only; uploader reads the tar from the archiver `/output` mount).
 
 ## Prod mirror
 
@@ -52,7 +48,7 @@ Copy `config/omeka-test/omeka-prod-source.yaml.example` → `omeka-prod-source.y
 
 ## Docs
 
-- [docs/build-real-dip.md](docs/build-real-dip.md) — press material → ingest → Omeka browse
+- [docs/build-real-dip.md](docs/build-real-dip.md) — press material → ingest → omeka-uploader
 - [docs/omeka-production.md](docs/omeka-production.md) — production vs test, ARKs, visibility
 - [docs/archive-theme-1plus4.md](docs/archive-theme-1plus4.md) — theme layout notes
 

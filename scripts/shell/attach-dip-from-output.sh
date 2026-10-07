@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Upload an existing preservation DIP .tar to test Omeka (from /dip-output in the container).
+# Legacy: upload via in-container PHP (public items; no ledger/Moby). Prefer archiver omeka-uploader.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
