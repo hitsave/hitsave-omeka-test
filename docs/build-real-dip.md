@@ -1,54 +1,61 @@
 # Build a real E-ARK DIP and view it in test Omeka
 
-Test Omeka does not ship synthetic fixture packages. DIPs come from the same **hitsave-archiver** ingest path used in production: a folder of press material (or a portable submission) → ClamAV → E-ARK AIP/DIP on the output volume → **omeka-uploader** sends the `.tar` to Omeka (same as batch production).
+DIPs are built and uploaded only through **hitsave-archiver** Docker Compose (ingest worker + **omeka-uploader**). This repo runs test Omeka on `:8088`; it does not wrap ingest or upload.
 
-## Prerequisites
-
-Sibling clones (paths adjustable via env vars):
+## Repos and host configuration
 
 ```text
-hitsave-archiver/
-hitsave-archiver-config/   # private secrets + database.yaml + Omeka API keys
-hitsave-omeka-test/        # this repo — Omeka on :8088
+hitsave-archiver/           # ingest + upload commands (run here)
+hitsave-archiver-config/    # secrets, database.yaml, Omeka API keys
+hitsave-omeka-test/         # MariaDB + Omeka (this repo)
 ```
 
-On your host, example paths (adjust to your layout):
-
-| Variable | Example |
-|----------|---------|
-| `HOST_PRESS_MATERIAL` | `/tank2/press-material` |
-| `HOST_OUTPUT` / `DIP_OUTPUT_ROOT` | `/tank/hitsave-archiver/output` |
-| `HITSAVE_PRIVATE_CONFIG` | `../hitsave-archiver-config` (or an absolute path) |
-
-Start preservation services and the test Omeka stack:
+Copy **hitsave-archiver-config** `host.env.example` → `host.env`, set paths, then source it before any archiver `docker compose` command:
 
 ```bash
-cd hitsave-archiver
-export HITSAVE_PRIVATE_CONFIG=../hitsave-archiver-config
-export HOST_PRESS_MATERIAL=/tank2/press-material
-export HOST_OUTPUT=/tank/hitsave-archiver/output
+cd hitsave-archiver-config
+cp host.env.example host.env
+# Edit: HITSAVE_PRIVATE_CONFIG, HOST_PRESS_MATERIAL, HOST_SUBMISSIONS, HOST_OUTPUT
+source host.env
+```
+
+| Variable | Role |
+|----------|------|
+| `HITSAVE_PRIVATE_CONFIG` | Private repo checkout (mounted at `/config/secrets` and `database.yaml`) |
+| `HOST_PRESS_MATERIAL` | Press-material tree (read-only in ingest worker) |
+| `HOST_OUTPUT` | AIP/DIP output; DIPs under `$HOST_OUTPUT/dip/` |
+| `HOST_SUBMISSIONS` | Optional portable zip intake |
+
+From **hitsave-archiver** after sourcing `host.env`:
+
+```bash
 ./scripts/ensure-local-config.sh
 python3 scripts/sync-preservation-config.py
 docker compose up -d postgres clamav
+```
 
-cd ../hitsave-omeka-test
+Test Omeka (separate compose project):
+
+```bash
+cd hitsave-omeka-test
 ./scripts/ensure-local-config.sh
 ./scripts/shell/run-omeka-test.sh
 ```
 
-Ensure **hitsave-archiver-config** has a working `secrets/omeka-api-credentials-local.yaml` (see archiver `config/secrets/*.example`). `config/omeka-uploader.yaml` in the public archiver repo points the uploader at test Omeka (`host.docker.internal:8088`).
+**Omeka API for upload:** create `secrets/omeka-api-credentials-local.yaml` in the private repo (see archiver `config/secrets/*.example`). Public **`config/omeka-uploader.yaml`** targets test Omeka at `http://host.docker.internal:8088/api` when the uploader runs in Docker on the same host as the test stack.
+
+Set **`DIP_OUTPUT_ROOT`** to the same directory as `HOST_OUTPUT` when starting **hitsave-omeka-test** so `/dip-output` inside Omeka matches archiver output (read-only; useful for inspection, not required for uploader).
 
 ## 1. Point ingest at real content
 
-In **hitsave-archiver**, copy the template and edit paths to a real game folder under press material:
+In **hitsave-archiver** (with `host.env` sourced):
 
 ```bash
-cd hitsave-archiver
 cp config/preservation/game.yml.example config/preservation/game.yml
-# Edit source_game_folder, game_key, omeka_item_title, output_tar name
+# Edit source_game_folder, game_key, omeka_item_title, output_tar
 ```
 
-Example fields (container paths — match `docker-compose.yml` mounts):
+Example (paths inside the ingest-worker container):
 
 ```yaml
 source_game_folder: /data/press-material/Publisher/GameName
@@ -57,39 +64,27 @@ game_key: game-name
 omeka_item_title: "Game Name — press and marketing materials"
 ```
 
-See also [portable submissions](https://github.com/hitsave/hitsave-archiver/blob/main/docs/portable-submissions.md) if the source is a zip under `/data/submissions/incoming/` instead of press-material.
+Portable zip intake: [portable-submissions.md](https://github.com/hitsave/hitsave-archiver/blob/main/docs/portable-submissions.md).
 
-## 2. Run ingest (build AIP + DIP)
+## 2. Ingest (AIP + DIP)
 
 ```bash
 cd hitsave-archiver
 docker compose run --rm ingest-worker /config/preservation/game.yml
 ```
 
-This creates a **ledger row** for `game_key` and writes the DIP tar on the host at `${HOST_OUTPUT}/dip/<name>.tar` (also visible in the test Omeka container as `/dip-output/` read-only).
+Creates a ledger row for `game_key` and writes `${HOST_OUTPUT}/dip/<name>.tar`.
 
-## 3. Upload the DIP to Omeka (preservation uploader)
-
-One game after ingest:
+## 3. Upload to test Omeka
 
 ```bash
 cd hitsave-archiver
 docker compose run --rm omeka-uploader game-name /config/preservation/game.yml
 ```
 
-Ingest + upload in one step (from **hitsave-omeka-test**, uses archiver `game.yml`):
-
-```bash
-./scripts/shell/ingest-and-upload-dip.sh
-```
-
-The uploader uses the Omeka **REST API** (multipart), ingester **`omeka_dip_package`**, **`config/omeka-uploader.yaml`** (site slug, item set, default visibility), optional **Moby** fields from the ledger, and records **omeka_item_id** / **omeka_media_id** on `game_ingest`. Batch runs use the same uploader via `scripts/run-batch-resume-omeka.sh`.
+Same **omeka-uploader** service as batch production (`scripts/run-batch-resume-omeka.sh`): REST multipart, ingester **`omeka_dip_package`**, `config/omeka-uploader.yaml`, optional Moby fields from the ledger, Omeka ids stored on `game_ingest`.
 
 ## Verify
 
-- Admin: `{public_url}/admin` — item whose media used ingester **`omeka_dip_package`** (Admin may show the label “DIP package (browse in place)”; test config usually keeps uploads **private** until you publish).
-- Public site: `{public_url}/s/hitsave-test/...` (see `config/omeka-test/settings.yaml`).
-
-## Legacy: in-container upload script
-
-`scripts/shell/attach-dip-from-output.sh` (PHP helper inside the Omeka container) predates the split and **duplicates** the uploader at the Omeka layer only. It skips the ledger, item set, Moby metadata, and REST credentials, and creates **public** items. Prefer **omeka-uploader** for anything that should match production.
+- Admin: `{public_url}/admin` — media ingester **`omeka_dip_package`** (test uploads are usually **private** until published).
+- Public site: `{public_url}/s/hitsave-test/...` (`config/omeka-test/settings.yaml`).

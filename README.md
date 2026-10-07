@@ -1,42 +1,27 @@
 # hitsave-omeka-test
 
-Local **Omeka S** stack for HitSave archive QA: **HitSaveArchive** theme, **OmekaDipViewer**, and prod mirror scripts. **E-ARK DIPs come from real preservation ingest** in sibling [**hitsave-archiver**](https://github.com/hitsave/hitsave-archiver), then upload via the same **omeka-uploader** used in production.
+Local **Omeka S** stack for HitSave archive QA: **HitSaveArchive** theme, **OmekaDipViewer**, and prod mirror scripts.
+
+**Ingest and DIP upload** run only from [**hitsave-archiver**](https://github.com/hitsave/hitsave-archiver) (`docker compose` + **omeka-uploader**). This repo is the Omeka sidecar on `:8088`.
 
 ## Layout
 
 ```text
-~/hitsave-archiver/           # Postgres ledger, ingest worker, omeka-uploader
-~/hitsave-archiver-config/    # secrets (private)
-~/hitsave-omeka-test/         # this repo — MariaDB + Omeka on :8088
+~/hitsave-archiver/           # run ingest + omeka-uploader here
+~/hitsave-archiver-config/    # secrets (private); source host.env
+~/hitsave-omeka-test/         # this repo
 ```
-
-Override paths with `HITSAVE_ARCHIVER_ROOT`, `HITSAVE_PRIVATE_CONFIG`, and `DIP_OUTPUT_ROOT` when clones or output paths differ.
 
 ## Quick start
 
 ```bash
 git clone https://github.com/hitsave/hitsave-omeka-test.git
 cd hitsave-omeka-test
-
-./scripts/ensure-local-config.sh   # settings.yaml from example
-./scripts/shell/run-omeka-test.sh  # build image, start stack, enable modules
+./scripts/ensure-local-config.sh
+./scripts/shell/run-omeka-test.sh
 ```
 
-Admin URL and password: `config/omeka-test/settings.yaml` (`omeka.public_url`, `omeka.admin_password`).
-
-## Build a real DIP and upload to test Omeka
-
-Full walkthrough: **[docs/build-real-dip.md](docs/build-real-dip.md)**.
-
-After `game.yml` exists in **hitsave-archiver**:
-
-```bash
-./scripts/shell/ingest-and-upload-dip.sh
-```
-
-Or ingest then upload separately with `docker compose run … omeka-uploader` (see doc).
-
-Compose mounts `${DIP_OUTPUT_ROOT:-/tank/hitsave-archiver/output}/dip` at `/dip-output` inside Omeka (read-only; uploader reads the tar from the archiver `/output` mount).
+Build a DIP and upload it: **[docs/build-real-dip.md](docs/build-real-dip.md)** (configure `host.env` in the private repo, then `docker compose` in **hitsave-archiver**).
 
 ## Prod mirror
 
@@ -48,7 +33,7 @@ Copy `config/omeka-test/omeka-prod-source.yaml.example` → `omeka-prod-source.y
 
 ## Docs
 
-- [docs/build-real-dip.md](docs/build-real-dip.md) — press material → ingest → omeka-uploader
+- [docs/build-real-dip.md](docs/build-real-dip.md) — archiver ingest + omeka-uploader
 - [docs/omeka-production.md](docs/omeka-production.md) — production vs test, ARKs, visibility
 - [docs/archive-theme-1plus4.md](docs/archive-theme-1plus4.md) — theme layout notes
 
