@@ -36,6 +36,12 @@ ark:
   property: dcterms:identifier
 
 site:
+  press_material:
+    page_slug: press-material
+    page_title: Press Materials
+    nav_label: Press Materials
+    browse_limit: 12
+
   batch_listing:
     page_slug: press-batch
     page_title: Press batch uploads

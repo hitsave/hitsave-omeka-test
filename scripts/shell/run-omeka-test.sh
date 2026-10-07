@@ -30,6 +30,7 @@ docker compose exec -T omeka omeka-s-cli module:enable Ark || true
 docker compose exec -T omeka php /scripts/ensure-omeka-ark-module.php || true
 docker compose exec -T -u root omeka php /scripts/ensure-omeka-test-site.php || true
 docker compose exec -T -u root omeka php /scripts/ensure-press-item-set.php || true
+docker compose exec -T -u root omeka php /scripts/ensure-press-material-site-page.php || true
 docker compose exec -T -u root omeka php /scripts/ensure-batch-listing-site-page.php || true
 
 echo "Admin: ${PUBLIC_URL}/admin (see config/omeka-test/settings.yaml for credentials)"

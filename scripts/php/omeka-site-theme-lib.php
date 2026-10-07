@@ -112,9 +112,9 @@ function archiveThemeFamilySettings(string $path): array
             $out['hitsave_color_mode'] = $mode;
         }
     }
-    if (preg_match('/^\s*logo_url:\s*(\S+)/m', $yaml, $m)) {
+    if (preg_match('/^\s*logo_url:\s*([^\r\n]*)/m', $yaml, $m)) {
         $url = trim($m[1], " \t\"'");
-        if ($url !== '' && strtolower($url) !== 'null') {
+        if ($url !== '' && strtolower($url) !== 'null' && preg_match('#^(https?://|/)#', $url)) {
             $out['hitsave_logo_url'] = $url;
         }
     }
@@ -167,6 +167,9 @@ function applyThemeSettings($themes, $siteSettings, $blockLayoutManager, int $si
         if ($merged[$settingKey] === null) {
             unset($merged[$settingKey]);
         }
+    }
+    if (!isset($settings['hitsave_logo_url'])) {
+        unset($merged['hitsave_logo_url']);
     }
     if (!empty($settings['resource_page_blocks'])) {
         $merged['resource_page_blocks'] = $blockLayoutManager->standardizeResourcePageBlocks(
