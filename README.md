@@ -33,6 +33,7 @@ Copy `config/omeka-test/omeka-prod-source.yaml.example` → `omeka-prod-source.y
 
 ## Docs
 
+- [docs/config-contract.md](docs/config-contract.md) — which YAML owns what (SSOT)
 - [docs/build-real-dip.md](docs/build-real-dip.md) — archiver ingest + omeka-uploader
 - [docs/omeka-production.md](docs/omeka-production.md) — production vs test, ARKs, visibility
 - [docs/archive-theme-1plus4.md](docs/archive-theme-1plus4.md) — theme layout notes

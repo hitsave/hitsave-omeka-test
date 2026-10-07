@@ -11,5 +11,6 @@ sleep 6
 docker compose exec -T -u root omeka php /scripts/apply-omeka-prod-mirror.php
 docker compose restart omeka
 
-PUBLIC="$(python3 -c "import yaml; print(yaml.safe_load(open('$ROOT/config/omeka-test/settings.yaml'))['omeka'].get('public_url','http://127.0.0.1:8088').rstrip('/'))")"
-echo "Test site: ${PUBLIC}/s/hitsave-test"
+PUBLIC="$(python3 -c "import yaml; d=yaml.safe_load(open('$ROOT/config/omeka-test/settings.yaml')); print(d['omeka'].get('public_url','http://127.0.0.1:8088').rstrip('/'))")"
+SLUG="$(python3 -c "import yaml; d=yaml.safe_load(open('$ROOT/config/omeka-test/settings.yaml')); print(d['omeka'].get('site_slug','hitsave-test'))")"
+echo "Test site: ${PUBLIC}/s/${SLUG}"

@@ -4,7 +4,7 @@ production:
   credentials_file: secrets/omeka-api-credentials-prod.yaml
 
 local:
-  api_config: config/omeka-test/omeka-api.yaml
+  settings: config/omeka-test/settings.yaml
 
 query:
   fulltext_search: ""

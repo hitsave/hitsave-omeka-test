@@ -9,9 +9,10 @@ python3 "$ROOT/scripts/shell/sync-docker-config.py"
 docker compose build omeka
 docker compose up -d mariadb omeka
 
-echo "Waiting for Omeka at http://localhost:8088 ..."
+PUBLIC_URL="$(python3 -c "import yaml; print(yaml.safe_load(open('$ROOT/config/omeka-test/settings.yaml'))['omeka'].get('public_url','http://127.0.0.1:8088').rstrip('/'))")"
+echo "Waiting for Omeka at ${PUBLIC_URL} ..."
 for i in $(seq 1 60); do
-  if curl -fsS "http://localhost:8088/login" >/dev/null 2>&1; then
+  if curl -fsS "${PUBLIC_URL}/login" >/dev/null 2>&1; then
     echo "Omeka is up."
     break
   fi
@@ -30,6 +31,5 @@ docker compose exec -T omeka omeka-s-cli module:enable Ark || true
 docker compose exec -T omeka php /scripts/ensure-omeka-ark-module.php || true
 docker compose exec -T -u root omeka php /scripts/ensure-batch-listing-site-page.php || true
 
-PUBLIC_URL="$(python3 -c "import yaml; print(yaml.safe_load(open('$ROOT/config/omeka-test/settings.yaml'))['omeka'].get('public_url','http://localhost:8088').rstrip('/'))")"
 echo "Admin: ${PUBLIC_URL}/admin (see config/omeka-test/settings.yaml for credentials)"
 echo "Ingest + upload: docs/build-real-dip.md (docker compose in hitsave-archiver; source host.env from archiver-config)"

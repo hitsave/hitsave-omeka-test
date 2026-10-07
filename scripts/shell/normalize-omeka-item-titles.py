@@ -17,8 +17,10 @@ except ImportError as e:
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_ROOT = Path(os.environ.get("HITSAVE_CONFIG_ROOT", str(REPO_ROOT / "config")))
+PRIVATE_ROOT = Path(os.environ.get("HITSAVE_PRIVATE_CONFIG", str(REPO_ROOT)))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from normalize_display_title import normalize_display_title  # noqa: E402
+from omeka_settings import resolve_api_config, load_settings  # noqa: E402
 
 
 def load_yaml(path: Path) -> dict:
@@ -34,11 +36,12 @@ def api_url(base: str, path: str, creds: dict) -> str:
 
 def main() -> None:
     dry_run = "--dry-run" in sys.argv
-    api_cfg = load_yaml(CONFIG_ROOT / "omeka-test/omeka-api.yaml")["api"]
+    settings_path = REPO_ROOT / "config" / "omeka-test" / "settings.yaml"
+    api_cfg = resolve_api_config(load_settings(settings_path))
     cred_rel = Path(api_cfg["credentials_file"])
-    if cred_rel.parts and cred_rel.parts[0] == "config":
-        cred_rel = Path(*cred_rel.parts[1:])
-    creds_path = CONFIG_ROOT / cred_rel
+    creds_path = PRIVATE_ROOT / cred_rel
+    if not creds_path.is_file():
+        creds_path = CONFIG_ROOT / cred_rel
     creds = load_yaml(creds_path)
     base = api_cfg["base_url"]
     session = requests.Session()

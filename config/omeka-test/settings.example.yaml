@@ -1,5 +1,5 @@
-# Test Omeka S stack. Copy to settings.yaml (gitignored) and adjust.
-# Optional overlay: settings.local.yaml (gitignored) merged by scripts/sync-docker-config.py
+# Test Omeka S stack — SSOT for this repo (see docs/config-contract.md).
+# Copy to settings.yaml (gitignored). Optional overlay: settings.local.yaml (gitignored).
 database:
   host: mariadb
   port: 3306
@@ -17,6 +17,15 @@ omeka:
   site_title: Hit Save! Archive (test)
   site_slug: hitsave-test
   item_set_title: Press and Marketing Materials
+
+# REST clients (local Python in this repo). hitsave-archiver omeka-uploader uses
+# config/omeka-uploader.yaml — keep site_slug, item_set_title, and base URL in sync.
+api:
+  base_url: http://host.docker.internal:8088/api
+  credentials_file: secrets/omeka-api-credentials-local.yaml
+  default_is_public: false
+  production_item_set_id: 1459
+  dip_ingester: omeka_dip_package
 
 ark:
   naan: "78322"

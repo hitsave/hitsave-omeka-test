@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import mimetypes
+import os
 import sys
 from pathlib import Path
 from urllib.parse import urlencode
@@ -16,6 +17,9 @@ except ImportError as exc:
     sys.exit(1)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from omeka_settings import load_settings, resolve_api_config  # noqa: E402
+
 DEFAULT_CONFIG = REPO_ROOT / "config/omeka-test/sample-from-prod.yaml"
 DEFAULT_CONFIG_EXAMPLE = REPO_ROOT / "config/omeka-test/sample-from-prod.yaml.example"
 
@@ -296,9 +300,19 @@ def main() -> None:
         if prod_creds.get("key_identity") in (None, "", "REPLACE_ME"):
             prod_creds = None
 
-    local_api = load_yaml(REPO_ROOT / cfg["local"]["api_config"])["api"]
+    local_block = cfg.get("local") or {}
+    if local_block.get("settings"):
+        local_api = resolve_api_config(load_settings(REPO_ROOT / local_block["settings"]))
+    elif local_block.get("api_config"):
+        legacy = load_yaml(REPO_ROOT / local_block["api_config"])
+        local_api = legacy.get("api") or legacy
+    else:
+        raise SystemExit("sample-from-prod.yaml needs local.settings (or legacy local.api_config)")
     local_base = local_api["base_url"].rstrip("/")
-    local_creds_path = REPO_ROOT / local_api["credentials_file"]
+    cred_rel = Path(local_api["credentials_file"])
+    local_creds_path = Path(os.environ.get("HITSAVE_PRIVATE_CONFIG", str(REPO_ROOT))) / cred_rel
+    if not local_creds_path.is_file():
+        local_creds_path = REPO_ROOT / cred_rel
     local_creds = load_yaml(local_creds_path)
 
     query = cfg.get("query") or {}

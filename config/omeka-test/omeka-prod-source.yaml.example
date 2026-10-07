@@ -8,6 +8,7 @@ production:
   press_resource_template_id: 0
 
 mirror:
+  # Keep equal to omeka.site_slug in settings.yaml
   target_site_slug: hitsave-test
   target_site_title: "Hit Save! Archive (test mirror)"
   target_theme: HitSaveArchive

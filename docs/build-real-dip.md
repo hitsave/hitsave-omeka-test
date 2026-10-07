@@ -67,7 +67,7 @@ From the **root of this clone**:
 ./scripts/shell/run-omeka-test.sh
 ```
 
-Edit **`config/omeka-test/settings.yaml`** (created from the example) for admin password and `omeka.public_url`.
+Edit **`config/omeka-test/settings.yaml`** (created from the example) for admin password, `omeka.public_url`, and `omeka.site_slug`. SSOT map: **[config-contract.md](./config-contract.md)**. Keep `api:` in sync with hitsave-archiver **`config/omeka-uploader.yaml`** when uploading from Docker.
 
 Optional: when starting this stack, set **`DIP_OUTPUT_ROOT`** to the same host directory as `HOST_OUTPUT` so Compose mounts `$DIP_OUTPUT_ROOT/dip` at `/dip-output` inside Omeka (read-only). That is only for inspecting tars on disk; **omeka-uploader** reads DIPs from the archiver `/output` mount, not from this path.
 

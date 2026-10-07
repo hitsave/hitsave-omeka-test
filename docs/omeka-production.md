@@ -130,7 +130,7 @@ Omeka S stores **`o:is_public` separately** on each item and each media record. 
 
 ### Intended policy
 
-- **Default:** new ingest items are **private** (`config/omeka-test/omeka-api.yaml` → `default_is_public: false`; same intent on prod for agent uploads).
+- **Default:** new ingest items are **private** (`config/omeka-test/settings.yaml` → `api.default_is_public: false`; archiver uploader: `config/omeka-uploader.yaml`; same intent on prod for agent uploads).
 - **Visibility is controlled at the item level.** Catalogers should not need a separate “hide this DIP media” step when the whole item is draft or published.
 - When an item is **published**, its DIP **media** should be **public** as well so the site carousel, file tree, and `/omeka-dip/file/…` streams work for anonymous users.
 
@@ -164,12 +164,12 @@ Production **resource page blocks** (present in local mirror output `config/omek
 
 | File | Purpose |
 |------|---------|
-| `config/omeka-test/omeka-api.yaml` | API base URL, `default_is_public`, item set title, `dip_ingester` |
+| `config/omeka-test/settings.yaml` | SSOT for test stack; `api:` block for REST tools (see [config-contract.md](./config-contract.md)) |
 | `config/omeka-test/omeka-prod-source.yaml` | Read-only prod mirror source (copy from `omeka-prod-source.yaml.example`; gitignored) |
-| `config/preservation/ingest.yaml` | Worker / ledger; not Omeka-specific |
-| `scripts/upload-dip-omeka-api.py` | Create item + DIP media via REST |
+| hitsave-archiver `config/omeka-uploader.yaml` | omeka-uploader container (keep aligned with test `settings.yaml` `api:` / `omeka:`) |
+| hitsave-archiver `config/preservation/ingest.yaml` | Worker / ledger; not Omeka-specific |
 
-Press and Marketing Materials item set: prod **`o:id` 1459**; test stack resolves by title from `omeka-api.yaml`.
+Press and Marketing Materials item set: prod **`o:id` 1459**; test stack resolves by title from `settings.yaml` (`omeka.item_set_title` / `api.item_set_title`).
 
 ---
 

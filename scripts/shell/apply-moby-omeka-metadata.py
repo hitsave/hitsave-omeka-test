@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 from pathlib import Path
 from urllib.parse import urlencode
@@ -17,7 +18,11 @@ except ImportError as e:
     sys.exit(1)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CONFIG_ROOT = Path("/config") if Path("/config/omeka-test/omeka-api.yaml").is_file() else REPO_ROOT / "config"
+CONFIG_ROOT = (
+    Path("/config")
+    if (Path("/config/omeka-test/settings.yaml").is_file() or Path("/config/omeka-test/omeka-api.yaml").is_file())
+    else REPO_ROOT / "config"
+)
 
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from moby_omeka_fields import append_moby_fields_to_payload  # noqa: E402
@@ -55,11 +60,21 @@ def main() -> None:
     game_key = sys.argv[1]
     ingest_cfg = _upload.load_yaml(CONFIG_ROOT / "preservation/ingest.yaml")
     db = _upload.load_yaml(Path(ingest_cfg["database"]["config_file"]))["postgres"]
-    api_cfg = _upload.load_yaml(CONFIG_ROOT / "omeka-test/omeka-api.yaml")["api"]
+    settings_path = CONFIG_ROOT / "omeka-test/settings.yaml"
+    if settings_path.is_file():
+        from omeka_settings import load_settings, resolve_api_config  # noqa: E402
+
+        api_cfg = resolve_api_config(load_settings(settings_path))
+    else:
+        api_cfg = _upload.load_yaml(CONFIG_ROOT / "omeka-test/omeka-api.yaml")["api"]
     cred_rel = Path(api_cfg["credentials_file"])
-    if cred_rel.parts and cred_rel.parts[0] == "config":
-        cred_rel = Path(*cred_rel.parts[1:])
-    creds = _upload.load_yaml(CONFIG_ROOT / cred_rel)
+    private = Path(os.environ.get("HITSAVE_PRIVATE_CONFIG", str(REPO_ROOT)))
+    creds_path = private / cred_rel
+    if not creds_path.is_file():
+        if cred_rel.parts and cred_rel.parts[0] == "config":
+            cred_rel = Path(*cred_rel.parts[1:])
+        creds_path = CONFIG_ROOT / cred_rel
+    creds = _upload.load_yaml(creds_path)
 
     conn = _upload.pg_connect(db)
     with conn.cursor() as cur:
