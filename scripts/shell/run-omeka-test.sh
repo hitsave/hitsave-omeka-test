@@ -5,7 +5,6 @@ cd "$ROOT"
 
 bash "$ROOT/scripts/ensure-local-config.sh"
 python3 "$ROOT/scripts/shell/sync-docker-config.py"
-bash "$ROOT/scripts/shell/build-fixture-dips.sh"
 
 docker compose build omeka
 docker compose up -d mariadb omeka
@@ -33,4 +32,4 @@ docker compose exec -T -u root omeka php /scripts/ensure-batch-listing-site-page
 
 PUBLIC_URL="$(python3 -c "import yaml; print(yaml.safe_load(open('$ROOT/config/omeka-test/settings.yaml'))['omeka'].get('public_url','http://localhost:8088').rstrip('/'))")"
 echo "Admin: ${PUBLIC_URL}/admin (see config/omeka-test/settings.yaml for credentials)"
-echo "Fixture DIP: fixtures/dips/built/sample-game.tar"
+echo "Build a real DIP: docs/build-real-dip.md (hitsave-archiver game.yml + ingest-and-attach-dip.sh)"

@@ -1,6 +1,6 @@
 # hitsave-omeka-test
 
-Local **Omeka S** stack for HitSave archive QA: **HitSaveArchive** theme, **OmekaDipViewer**, prod mirror scripts, and fixture DIPs. Preservation ingest and REST upload live in sibling [**hitsave-archiver**](https://github.com/hitsave/hitsave-archiver).
+Local **Omeka S** stack for HitSave archive QA: **HitSaveArchive** theme, **OmekaDipViewer**, and prod mirror scripts. **E-ARK DIPs come from real preservation ingest** in sibling [**hitsave-archiver**](https://github.com/hitsave/hitsave-archiver), not from bundled fixture tars.
 
 ## Layout
 
@@ -10,7 +10,7 @@ Local **Omeka S** stack for HitSave archive QA: **HitSaveArchive** theme, **Omek
 ~/hitsave-omeka-test/         # this repo — MariaDB + Omeka on :8088
 ```
 
-Override paths with `HITSAVE_ARCHIVER_ROOT` and `HITSAVE_PRIVATE_CONFIG` when clones are not siblings.
+Override paths with `HITSAVE_ARCHIVER_ROOT`, `HITSAVE_PRIVATE_CONFIG`, and `DIP_OUTPUT_ROOT` when clones or output paths differ.
 
 ## Quick start
 
@@ -24,18 +24,23 @@ cd hitsave-omeka-test
 
 Admin URL and password: `config/omeka-test/settings.yaml` (`omeka.public_url`, `omeka.admin_password`).
 
-Build fixture DIPs (requires a **hitsave-archiver** clone):
+## Build a real DIP and attach it
+
+Full walkthrough: **[docs/build-real-dip.md](docs/build-real-dip.md)**.
+
+Short path (after `game.yml` exists in **hitsave-archiver**):
 
 ```bash
-./scripts/shell/build-fixture-dips.sh
-./scripts/shell/create-dip-example-item.sh /fixtures/dips/built/sample-game.tar
+./scripts/shell/ingest-and-attach-dip.sh
 ```
 
-End-to-end ingest from press material uses **archiver** `game.yml` plus:
+Or ingest in archiver, then attach an existing tar from the output volume:
 
 ```bash
-./scripts/shell/create-dip-from-press-pilot.sh
+./scripts/shell/attach-dip-from-output.sh my-game.tar "My Game — press materials"
 ```
+
+Compose mounts `${DIP_OUTPUT_ROOT:-/tank/hitsave-archiver/output}/dip` at `/dip-output` inside Omeka.
 
 ## Prod mirror
 
@@ -45,12 +50,9 @@ Copy `config/omeka-test/omeka-prod-source.yaml.example` → `omeka-prod-source.y
 ./scripts/shell/sync-omeka-prod-mirror.sh
 ```
 
-## DIP output mount
-
-Compose mounts `${DIP_OUTPUT_ROOT:-/tank/hitsave-archiver/output}/dip` read-only at `/dip-output` inside Omeka for attaching preservation tars.
-
 ## Docs
 
+- [docs/build-real-dip.md](docs/build-real-dip.md) — press material → ingest → Omeka browse
 - [docs/omeka-production.md](docs/omeka-production.md) — production vs test, ARKs, visibility
 - [docs/archive-theme-1plus4.md](docs/archive-theme-1plus4.md) — theme layout notes
 

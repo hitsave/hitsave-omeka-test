@@ -8,6 +8,4 @@ config/omeka-test/mirror/*
 !config/omeka-test/mirror/README.md
 config/omeka-test/omeka-prod-source.yaml
 config/omeka-test/sample-from-prod.yaml
-fixtures/dips/built/
-fixtures/dips/.staging/
 docker-compose.override.yml

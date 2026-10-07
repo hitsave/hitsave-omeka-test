@@ -2,7 +2,7 @@
 /**
  * Create an Omeka item with a fixture DIP (runs inside the Omeka container).
  *
- * Usage: php scripts/create-dip-example-item.php [/path/to/package.tar]
+ * Usage: php scripts/create-dip-example-item.php /dip-output/game.tar [title]
  */
 declare(strict_types=1);
 
@@ -10,10 +10,15 @@ use Omeka\Entity\User;
 
 require '/var/www/html/bootstrap.php';
 
-$tarPath = $argv[1] ?? '/fixtures/dips/built/sample-game.tar';
+$tarPath = $argv[1] ?? null;
 $itemTitleOverride = $argv[2] ?? null;
+if ($tarPath === null || $tarPath === '') {
+    fwrite(STDERR, "Usage: create-dip-example-item.php /dip-output/<game>.tar [title]\n");
+    exit(1);
+}
 if (!is_readable($tarPath)) {
     fwrite(STDERR, "DIP not found or unreadable: {$tarPath}\n");
+    fwrite(STDERR, "Build via hitsave-archiver ingest; tars appear under /dip-output (host DIP_OUTPUT_ROOT/dip).\n");
     exit(1);
 }
 

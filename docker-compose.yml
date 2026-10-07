@@ -36,25 +36,11 @@ services:
       - ./config/omeka-test:/config/omeka-test:ro
       - ./scripts/php:/scripts:ro
       - omeka_files:/var/www/html/volume/files
-      - ./fixtures:/fixtures:ro
       - ${DIP_OUTPUT_ROOT:-/tank/hitsave-archiver/output}/dip:/dip-output:ro
       - ./scripts/docker-entrypoint-99-dip-viewer-upgrade.sh:/docker-entrypoint-init.d/99-dip-viewer-upgrade.sh:ro
     depends_on:
       mariadb:
         condition: service_healthy
-
-  test-runner:
-    build:
-      context: .
-      dockerfile: Dockerfile.test-runner
-    profiles: ["test"]
-    volumes:
-      - ./config/omeka-test/settings.yaml:/config/settings.yaml:ro
-      - ./fixtures:/fixtures:ro
-      - ./scripts:/scripts:ro
-    depends_on:
-      omeka:
-        condition: service_started
 
 volumes:
   mariadb_data:

@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
+# Deprecated wrapper — use attach-dip-from-output.sh
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-cd "$ROOT"
-
-bash "$ROOT/scripts/shell/build-fixture-dips.sh"
-
-docker compose exec -T omeka php /scripts/ensure-omeka-test-site.php
-docker compose exec -T omeka php /scripts/create-dip-example-item.php "$@"
+exec "$ROOT/scripts/shell/attach-dip-from-output.sh" "$@"
