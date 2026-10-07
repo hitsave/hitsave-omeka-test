@@ -7,9 +7,9 @@ Local **Omeka S** stack for HitSave archive QA: **HitSaveArchive** theme, **Omek
 ## Layout
 
 ```text
-~/hitsave-archiver/           # run ingest + omeka-uploader here
-~/hitsave-archiver-config/    # secrets (private); source host.env
-~/hitsave-omeka-test/         # this repo
+~/hitsave-archiver/           # run ingest + omeka-uploader here; *.example templates live here
+~/hitsave-archiver-config/    # your secrets (copy from archiver examples — see operator-config.md)
+~/hitsave-omeka-test/         # this repo; config/omeka-test/*.example for Omeka admin/DB
 ```
 
 ## Quick start

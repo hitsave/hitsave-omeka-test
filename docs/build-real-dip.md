@@ -22,31 +22,38 @@ Typical sibling layout:
 
 ## One-time setup
 
-### A. Host paths and secrets
+### A. Private config and host paths
 
-In **hitsave-archiver-config**, copy `host.env.example` → `host.env`, set real paths, and **source** that file in every shell where you run preservation commands:
+Create **`hitsave-archiver-config`** (private git repo or any directory) using the committed **`*.example`** files in [**hitsave-archiver**](https://github.com/hitsave/hitsave-archiver). Canonical file list, manual `cp` commands, and what stays in the public clone: **[operator-config.md](https://github.com/hitsave/hitsave-archiver/blob/main/docs/operator-config.md)**.
+
+Quick bootstrap from the public archiver clone (copies secrets + `database.yaml` into a sibling private dir):
 
 ```bash
-cd ~/hitsave-archiver-config
-cp host.env.example host.env
-# HITSAVE_PRIVATE_CONFIG, HOST_PRESS_MATERIAL, HOST_SUBMISSIONS, HOST_OUTPUT
+cd ~/hitsave-archiver
+./scripts/ensure-local-config.sh
+```
+
+Then copy host path exports and edit **every** copied secret (replace placeholders):
+
+```bash
+cp ~/hitsave-archiver/config/host.env.example ~/hitsave-archiver-config/host.env
+# Edit HITSAVE_PRIVATE_CONFIG, HOST_PRESS_MATERIAL, HOST_SUBMISSIONS, HOST_OUTPUT
 source ~/hitsave-archiver-config/host.env
 ```
 
 | Variable | Role |
 |----------|------|
-| `HITSAVE_PRIVATE_CONFIG` | Path to the private config repo (Compose mounts secrets + `database.yaml`) |
-| `HOST_PRESS_MATERIAL` | Press-material tree on the host → `/data/press-material` in the worker |
-| `HOST_OUTPUT` | AIP/DIP output on the host → `/output` in the worker; DIPs under `$HOST_OUTPUT/dip/` |
-| `HOST_SUBMISSIONS` | Optional zip intake tree → `/data/submissions` |
+| `HITSAVE_PRIVATE_CONFIG` | Path to your private config directory |
+| `HOST_PRESS_MATERIAL` | Press-material on the host → `/data/press-material` in the worker |
+| `HOST_OUTPUT` | AIP/DIP output → `/output` in the worker; DIPs under `$HOST_OUTPUT/dip/` |
+| `HOST_SUBMISSIONS` | Optional zip intake → `/data/submissions` |
 
-Add **`secrets/omeka-api-credentials-local.yaml`** in the private repo (templates in archiver `config/secrets/*.example`). The uploader reads it via **`config/omeka-uploader.yaml`** in the public archiver repo (default API base `http://host.docker.internal:8088/api` when test Omeka runs on the same machine).
+For test Omeka upload you need **`secrets/omeka-api-credentials-local.yaml`** in that private tree — copy from [`config/secrets/omeka-api-credentials-local.yaml.example`](https://github.com/hitsave/hitsave-archiver/blob/main/config/secrets/omeka-api-credentials-local.yaml.example) and create an Omeka S API key. The uploader uses public [`config/omeka-uploader.yaml`](https://github.com/hitsave/hitsave-archiver/blob/main/config/omeka-uploader.yaml) (default `http://host.docker.internal:8088/api` when test Omeka runs on the same host).
 
-Bootstrap and start long-lived preservation services:
+Start long-lived preservation services (with `host.env` sourced):
 
 ```bash
 cd ~/hitsave-archiver
-./scripts/ensure-local-config.sh
 python3 scripts/sync-preservation-config.py
 docker compose up -d postgres clamav
 ```
@@ -71,6 +78,8 @@ Optional: when starting this stack, set **`DIP_OUTPUT_ROOT`** to the same host d
 All commands below assume **`source ~/hitsave-archiver-config/host.env`** (or your `host.env` path) and **`cd ~/hitsave-archiver`**.
 
 ### 1. Configure `game.yml`
+
+In the **hitsave-archiver** clone (not the private config repo):
 
 ```bash
 cp config/preservation/game.yml.example config/preservation/game.yml
