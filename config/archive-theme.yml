@@ -1,0 +1,35 @@
+# Hit Save archive theme defaults (HitSaveArchive overlay).
+# Brand colors (from hitsave.org Ghost theme): teal #00BEC1, purple #6d327c, green #32b37b, page gray #F4F4F4.
+# URLs are copied into Omeka theme settings on mirror apply; edit here, then re-apply mirror or set in admin.
+appearance:
+  # Default for new visitors; browser toggle overrides (localStorage).
+  color_mode: dark
+
+brand:
+  # Bundled in theme as asset/img/hit-save-wordmark.png (same wordmark as hitsave.org). Override if needed.
+  logo_url:
+
+family:
+  org_url: https://hitsave.org
+  preserve_url: https://preserve.games
+  support_url: https://hitsave.org/support-us/
+  get_involved_url: https://forms.gle/uwnWEPmyrpgiz3AGA
+  archive_label: The Archive
+
+browse:
+  # Foundation theme setting: full | fadeout | ellipsis (4 lines)
+  truncate_body_property: ellipsis
+
+homepage:
+  # Omeka site page slug used as homepage on prod mirror today.
+  slug: intro
+  hero_title: Explore the collection
+  hero_tagline: Search press kits, magazines, tapes, and other materials from our physical and digital vaults.
+
+discovery_tiles:
+  - label: Press & marketing
+    hint: Flyers, ads, pack-in art
+    path: page/press-material
+  - label: VHS tapes
+    hint: Full-text search
+    path: item?fulltext_search=VHS

@@ -1,0 +1,5 @@
+FROM python:3.12-alpine
+RUN apk add --no-cache curl bash
+WORKDIR /work
+COPY scripts/run-dip-smoke-test.py /work/run-dip-smoke-test.py
+ENTRYPOINT ["python3", "/work/run-dip-smoke-test.py"]

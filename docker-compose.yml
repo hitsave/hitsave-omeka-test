@@ -1,0 +1,62 @@
+# Local Omeka S stack for HitSave archive QA (theme, OmekaDipViewer, prod mirror).
+# Preservation ingest/upload: sibling hitsave-archiver + hitsave-archiver-config.
+name: hitsave-omeka-test
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    restart: unless-stopped
+    env_file:
+      - config/omeka-test/generated.env
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  omeka:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - config/omeka-test/generated.env
+    ports:
+      - "8088:8080"
+    environment:
+      client_max_body_size: 1024M
+      upload_max_filesize: 1024M
+      post_max_size: 1024M
+    volumes:
+      - ./config/omeka-test/local.config.php:/var/www/html/config/local.config.php:ro
+      - ./config/omeka-test/settings.yaml:/config/settings.yaml:ro
+      - ./config/archive-theme.yml:/config/archive-theme.yml:ro
+      - ./config/omeka-test:/config/omeka-test:ro
+      - ./scripts/php:/scripts:ro
+      - omeka_files:/var/www/html/volume/files
+      - ./fixtures:/fixtures:ro
+      - ${DIP_OUTPUT_ROOT:-/tank/hitsave-archiver/output}/dip:/dip-output:ro
+      - ./scripts/docker-entrypoint-99-dip-viewer-upgrade.sh:/docker-entrypoint-init.d/99-dip-viewer-upgrade.sh:ro
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-runner
+    profiles: ["test"]
+    volumes:
+      - ./config/omeka-test/settings.yaml:/config/settings.yaml:ro
+      - ./fixtures:/fixtures:ro
+      - ./scripts:/scripts:ro
+    depends_on:
+      omeka:
+        condition: service_started
+
+volumes:
+  mariadb_data:
+  omeka_files:
+    name: hitsave-omeka-test-files

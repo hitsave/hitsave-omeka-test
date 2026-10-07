@@ -1,0 +1,6 @@
+user     = "omeka_s"
+password = "change_me_db_password"
+dbname   = "omeka_s"
+host     = "mariadb"
+port     = 3306
+charset  = "utf8mb4"

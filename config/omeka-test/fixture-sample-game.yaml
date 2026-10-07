@@ -1,0 +1,14 @@
+# Minimal DIP fixture for OmekaDipViewer smoke tests (built into fixtures/dips/built/).
+source_game_folder: /fixtures/dips/sources/sample-game
+output_tar: /fixtures/dips/built/sample-game.tar
+staging_dir: /fixtures/dips/.staging/sample-game
+aip_bag_dir: /fixtures/dips/.staging/sample-game-aip
+game_key: fixture-sample-game
+omeka_item_title: "Sample Game Press Kit (DIP fixture)"
+max_files: 50
+max_total_bytes: 104857600
+
+preservation:
+  repository_code: hitsave
+  agent_name: HitSave archive ingest
+  agent_version: build-dip-e-ark.py

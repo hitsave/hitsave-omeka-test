@@ -1,0 +1,13 @@
+# Copy to omeka-prod-source.yaml (gitignored). Used by scripts/pull-omeka-prod-mirror.py.
+# Requires secrets/omeka-api-credentials-prod.yaml in private config.
+production:
+  base_url: https://archive.example.org/api
+  credentials_file: secrets/omeka-api-credentials-prod.yaml
+  site_slug: start
+  site_id: 0
+  press_resource_template_id: 0
+
+mirror:
+  target_site_slug: hitsave-test
+  target_site_title: "Hit Save! Archive (test mirror)"
+  target_theme: HitSaveArchive

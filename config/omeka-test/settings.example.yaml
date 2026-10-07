@@ -1,0 +1,84 @@
+# Test Omeka S stack. Copy to settings.yaml (gitignored) and adjust.
+# Optional overlay: settings.local.yaml (gitignored) merged by scripts/sync-docker-config.py
+database:
+  host: mariadb
+  port: 3306
+  name: omeka_s
+  user: omeka_s
+  password: change_me_db_password
+  root_password: change_me_root_password
+
+omeka:
+  # Use one URL consistently in the browser (CSRF/session). Match docker publish port (8088).
+  public_url: http://127.0.0.1:8088
+  admin_email: admin@example.com
+  admin_name: Admin
+  admin_password: change_me_admin_password
+  site_title: Hit Save! Archive (test)
+  site_slug: hitsave-test
+  item_set_title: Press and Marketing Materials
+
+ark:
+  naan: "78322"
+  name: internal
+  qualifier: internal
+  qualifier_static: true
+  property: dcterms:identifier
+
+site:
+  batch_listing:
+    page_slug: press-batch
+    page_title: Press batch uploads
+    nav_label: Press batch
+    item_set_title: Representation Copies (T batch test)
+    item_title_search: Representation Copies (T batch test)
+    min_item_id: 10
+    browse_limit: 100
+
+dip_viewer:
+  large_package_threshold_bytes: 524288000
+  gallery_max_bytes: 52428800
+  gallery_max_display: 48
+  gallery_mime_types:
+    - image/jpeg
+    - image/png
+    - image/gif
+    - image/webp
+  index_cache:
+    enabled: true
+    directory: data/dip_index_cache
+  stream_cache:
+    directory: data/dip_stream_cache
+  video_player:
+    enabled: true
+  browse_preview:
+    enabled: true
+    collage_min_images: 4
+    collage_max_images: 8
+    max_bytes_per_image: 10485760
+    cache_directory: data/dip_preview_cache
+  video_access:
+    enabled: true
+    ffmpeg_path: ffmpeg
+    max_height: 720
+    crf: 23
+    preset: fast
+    copy_mp4_without_transcode: true
+    extensions:
+      - mov
+      - avi
+      - mkv
+      - wmv
+      - mp4
+      - m4v
+      - webm
+      - mpg
+      - mpeg
+
+storage:
+  aip:
+    backend: s3
+    endpoint: https://s3.wasabisys.com
+    region: us-east-1
+    bucket: your-aip-bucket-name
+    prefix: press-material/

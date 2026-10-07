@@ -1,0 +1,17 @@
+# Copy to sample-from-prod.yaml (gitignored). Used by scripts/copy-omeka-prod-sample-items.py.
+production:
+  base_url: https://archive.example.org/api
+  credentials_file: secrets/omeka-api-credentials-prod.yaml
+
+local:
+  api_config: config/omeka-test/omeka-api.yaml
+
+query:
+  fulltext_search: ""
+  limit: 4
+  sort_by: created
+  sort_order: desc
+
+item_set_title: Samples (from production)
+resource_class_term: dctype:MovingImage
+is_public: true
