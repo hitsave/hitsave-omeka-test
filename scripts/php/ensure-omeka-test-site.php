@@ -68,10 +68,13 @@ $themeSettings = array_merge(
 );
 applyThemeSettings($themes, $siteSettings, $blockLayoutManager, $siteId, $theme, $themeSettings);
 
+$homepage = ensureSiteHomepageHub($api, $siteId, '/config/archive-theme.yml');
+
 echo json_encode([
     'site_id' => $siteId,
     'slug' => $slug,
     'theme' => $theme,
     'created' => $created,
     'resource_page_blocks' => hitsaveDefaultResourcePageBlocks(),
+    'homepage' => $homepage,
 ], JSON_PRETTY_PRINT) . "\n";

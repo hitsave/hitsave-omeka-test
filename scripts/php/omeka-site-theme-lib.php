@@ -29,6 +29,64 @@ function hitsaveDefaultThemeSettings(): array
     ];
 }
 
+function archiveThemeHomepagePage(string $path): array
+{
+    $out = ['slug' => 'intro', 'title' => 'Introduction'];
+    if (!is_readable($path)) {
+        return $out;
+    }
+    $yaml = file_get_contents($path);
+    if (preg_match('/^\s*homepage:\s*\n(?:^\s+.+\n)*?^\s*slug:\s*(\S+)/m', $yaml, $m)) {
+        $out['slug'] = trim($m[1], " \t\"'");
+    }
+    if (preg_match('/^\s*homepage:\s*\n(?:^\s+.+\n)*?^\s*hero_title:\s*(.+)$/m', $yaml, $m)) {
+        $out['title'] = trim($m[1], " \t\"'");
+    }
+    return $out;
+}
+
+/** Public intro page + o:homepage for HitSaveArchive discovery hub (no prod mirror required). */
+function ensureSiteHomepageHub($api, int $siteId, string $archiveThemePath): array
+{
+    $spec = archiveThemeHomepagePage($archiveThemePath);
+    $slug = $spec['slug'];
+    $title = $spec['title'];
+
+    $existing = $api->search('site_pages', ['site_id' => $siteId, 'slug' => $slug])->getContent();
+    if ($existing) {
+        $pageId = (int) $existing[0]->id();
+        $created = false;
+    } else {
+        $page = $api->create('site_pages', [
+            'o:site' => ['o:id' => $siteId],
+            'o:slug' => $slug,
+            'o:title' => $title,
+            'o:is_public' => true,
+            'o:block' => [],
+        ])->getContent();
+        $pageId = (int) $page->id();
+        $created = true;
+    }
+
+    $sites = $api->search('sites', ['id' => $siteId])->getContent();
+    $site = $sites[0] ?? null;
+    $currentHomeId = $site && $site->homepage() ? (int) $site->homepage()->id() : 0;
+    $homepageUpdated = false;
+    if ($currentHomeId !== $pageId) {
+        $api->update('sites', $siteId, [
+            'o:homepage' => ['o:id' => $pageId],
+        ], [], ['isPartial' => true]);
+        $homepageUpdated = true;
+    }
+
+    return [
+        'page_id' => $pageId,
+        'page_slug' => $slug,
+        'page_created' => $created,
+        'homepage_updated' => $homepageUpdated,
+    ];
+}
+
 function archiveThemeFamilySettings(string $path): array
 {
     if (!is_readable($path)) {
