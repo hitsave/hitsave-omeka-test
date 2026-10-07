@@ -21,7 +21,7 @@ cd hitsave-omeka-test
 ./scripts/shell/run-omeka-test.sh
 ```
 
-Build a DIP and upload it: **[docs/build-real-dip.md](docs/build-real-dip.md)** (configure `host.env` in the private repo, then `docker compose` in **hitsave-archiver**).
+End-to-end DIP QA (archiver ingest + uploader, then browse in this Omeka): **[docs/build-real-dip.md](docs/build-real-dip.md)**.
 
 ## Prod mirror
 
