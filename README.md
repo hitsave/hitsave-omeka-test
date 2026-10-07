@@ -24,7 +24,7 @@ cd hitsave-omeka-test
 
 Admin URL and password: `config/omeka-test/settings.yaml` (`omeka.public_url`, `omeka.admin_password`).
 
-## Build a real DIP and attach it
+## Build a real DIP and upload it to test Omeka
 
 Full walkthrough: **[docs/build-real-dip.md](docs/build-real-dip.md)**.
 
@@ -34,7 +34,7 @@ Short path (after `game.yml` exists in **hitsave-archiver**):
 ./scripts/shell/ingest-and-attach-dip.sh
 ```
 
-Or ingest in archiver, then attach an existing tar from the output volume:
+Or ingest in archiver, then upload an existing tar from the output volume (QA script; production-like upload uses archiver `omeka-uploader` — see the doc):
 
 ```bash
 ./scripts/shell/attach-dip-from-output.sh my-game.tar "My Game — press materials"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build DIP via hitsave-archiver ingest, then attach on local Omeka test stack.
+# Build DIP via hitsave-archiver ingest, then upload to local Omeka test stack (QA helper).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 ARCHIVER="${HITSAVE_ARCHIVER_ROOT:-$ROOT/../hitsave-archiver}"

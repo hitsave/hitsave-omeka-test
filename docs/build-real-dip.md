@@ -72,15 +72,19 @@ ${HOST_OUTPUT}/dip/<name>.tar
 
 (same tree mounted read-only in Omeka as `/dip-output/`).
 
-## 3. Attach the DIP on test Omeka (browse in place)
+## 3. Upload the DIP to test Omeka
 
-From **hitsave-omeka-test**:
+Omeka stores the `.tar` as **media** on an item using the **DIP package (browse in place)** ingester (`omeka_dip_package`) — the same upload path you would use in Admin, but scripted for QA.
+
+From **hitsave-omeka-test** (tar already under `/dip-output` from step 2):
 
 ```bash
 ./scripts/shell/attach-dip-from-output.sh game-name.tar "Game Name — press and marketing materials"
 ```
 
-Or run ingest + attach in one step:
+(`attach-dip-from-output.sh` is a thin wrapper around the Omeka API upload helper in `scripts/php/create-dip-example-item.php`.)
+
+Ingest + upload in one step:
 
 ```bash
 ./scripts/shell/ingest-and-attach-dip.sh
@@ -88,9 +92,11 @@ Or run ingest + attach in one step:
 
 (`ingest-and-attach-dip.sh` uses `hitsave-archiver/config/preservation/game.yml` by default.)
 
-## 4. Upload via REST (production-like)
+This path is for **manual QA**: it does not update the Postgres ledger.
 
-Skip manual attach; use the archiver uploader after ingest:
+## 4. Upload via preservation uploader (production-like)
+
+For batch ingest and operator workflows, use the archiver **omeka-uploader** after step 2 — REST multipart upload, same ingester, plus ledger rows and optional Moby fields:
 
 ```bash
 cd hitsave-archiver
@@ -98,6 +104,8 @@ docker compose run --rm omeka-uploader <game_key> /config/preservation/game.yml
 ```
 
 Configure the API target in **hitsave-archiver** `config/omeka-uploader.yaml` (test stack: `host.docker.internal:8088`). Credentials live in **hitsave-archiver-config**.
+
+You normally use **either** section 3 **or** section 4 for a given game, not both.
 
 ## Verify
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Attach an existing preservation DIP tar (under /dip-output in the Omeka container).
+# Upload an existing preservation DIP .tar to test Omeka (from /dip-output in the container).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
