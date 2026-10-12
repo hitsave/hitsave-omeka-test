@@ -15,7 +15,7 @@ PHP entrypoints read **`/config/settings.yaml`** (Compose bind-mount). **`omeka.
 
 | Field | Test stack SSOT | Archiver uploader SSOT |
 |-------|-----------------|-------------------------|
-| Site slug | `settings.yaml` → `omeka.site_slug` | [`hitsave-archiver` `config/omeka-uploader.yaml`](https://github.com/hitsave/hitsave-archiver/blob/main/config/omeka-uploader.yaml) → `api.site_slug` |
+| Site slug | `settings.yaml` → `omeka.site_slug` | [`hitsave-archiver` `config/omeka-catalog.yaml`](https://github.com/hitsave/hitsave-archiver/blob/main/config/omeka-catalog.yaml) → `api.site_slug` |
 | Item set title | `omeka.item_set_title` | `api.item_set_title` |
 | API base (from Docker on host) | `api.base_url` (`host.docker.internal:8088`) | same file |
 | Credentials | Private **hitsave-archiver-config** → `secrets/omeka-api-credentials-local.yaml` | mounted at `/config/secrets/` in archiver Compose |

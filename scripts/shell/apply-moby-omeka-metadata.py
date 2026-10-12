@@ -29,7 +29,7 @@ from moby_omeka_fields import append_moby_fields_to_payload  # noqa: E402
 from moby_resolve import finalize_moby_metadata, moby_attribution_text, uses_moby_catalog_data  # noqa: E402
 
 _upload_spec = importlib.util.spec_from_file_location(
-    "upload_dip_omeka_api", REPO_ROOT / "scripts/upload-dip-omeka-api.py"
+    "register_dip_omeka_api", REPO_ROOT / "scripts/register-dip-omeka-api.py"
 )
 _upload = importlib.util.module_from_spec(_upload_spec)
 assert _upload_spec.loader

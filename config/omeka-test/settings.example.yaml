@@ -19,8 +19,8 @@ omeka:
   theme: HitSaveArchive
   item_set_title: Press and Marketing Materials
 
-# REST clients (local Python in this repo). hitsave-archiver omeka-uploader uses
-# config/omeka-uploader.yaml — keep site_slug, item_set_title, and base URL in sync.
+# REST clients (local Python in this repo). hitsave-archiver omeka-catalog uses
+# config/omeka-catalog.yaml — keep site_slug, item_set_title, and base URL in sync.
 api:
   base_url: http://host.docker.internal:8088/api
   credentials_file: secrets/omeka-api-credentials-local.yaml

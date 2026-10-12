@@ -27,7 +27,7 @@ docker compose -f docker-compose.yml -f docker-compose.s3-direct.yml up -d
 
 ## Omeka media fields
 
-After ingest and `upload-dip-omeka-api.py`:
+After ingest and `register-dip-omeka-api.py`:
 
 | Field | Example |
 |-------|---------|

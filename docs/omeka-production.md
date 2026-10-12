@@ -107,7 +107,7 @@ Production still serves **`/ark:/…`** at the host root; test uses the **`/s/{s
 
 The Ark module hooks **`api.create.post`** and **`api.update.post`** on items, media, and item sets. If **`dcterms:identifier`** does not already contain an ARK, the module mints one (`addArk` in Ark `Module.php`). It **does not** overwrite an existing ARK.
 
-Implications for **agent ingest** (`scripts/upload-dip-omeka-api.py`):
+Implications for **agent ingest** (`scripts/register-dip-omeka-api.py`):
 
 - **Do not** POST `dcterms:identifier` with `ark:/78322/…` from the uploader—the item id is not known until after create, and the module should mint the ARK on prod.
 - After a successful **`POST /api/items`** on production (with Ark active), expect `dcterms:identifier` = `ark:/78322/{new_item_id}` on read-back.
@@ -129,13 +129,13 @@ Omeka S stores **`o:is_public` separately** on each item and each media record. 
 
 ### Intended policy
 
-- **Default:** new ingest items are **private** (`config/omeka-test/settings.yaml` → `api.default_is_public: false`; archiver uploader: `config/omeka-uploader.yaml`; same intent on prod for agent uploads).
+- **Default:** new ingest items are **private** (`config/omeka-test/settings.yaml` → `api.default_is_public: false`; archiver uploader: `config/omeka-catalog.yaml`; same intent on prod for agent catalog registration).
 - **Visibility is controlled at the item level.** Catalogers should not need a separate “hide this DIP media” step when the whole item is draft or published.
 - When an item is **published**, its DIP **media** should be **public** as well so the site carousel, file tree, and `/omeka-dip/file/…` streams work for anonymous users.
 
 ### What ingest does today
 
-`scripts/upload-dip-omeka-api.py` sets the **same** `o:is_public` on the item and the DIP media row (API JSON create, no file upload).
+`scripts/register-dip-omeka-api.py` sets the **same** `o:is_public` on the item and the DIP media row (API JSON create, no file upload).
 
 ### Gaps to close before / during prod DIP rollout
 
@@ -165,7 +165,7 @@ Production **resource page blocks** (present in local mirror output `config/omek
 |------|---------|
 | `config/omeka-test/settings.yaml` | SSOT for test stack; `api:` block for REST tools (see [config-contract.md](./config-contract.md)) |
 | `config/omeka-test/omeka-prod-source.yaml` | Read-only prod mirror source (copy from `omeka-prod-source.yaml.example`; gitignored) |
-| hitsave-archiver `config/omeka-uploader.yaml` | omeka-uploader container (keep aligned with test `settings.yaml` `api:` / `omeka:`) |
+| hitsave-archiver `config/omeka-catalog.yaml` | omeka-catalog container (keep aligned with test `settings.yaml` `api:` / `omeka:`) |
 | hitsave-archiver `config/preservation/ingest.yaml` | Worker / ledger; not Omeka-specific |
 
 Press and Marketing Materials item set: prod **`o:id` 1459**; test stack resolves by title from `settings.yaml` (`omeka.item_set_title` / `api.item_set_title`).

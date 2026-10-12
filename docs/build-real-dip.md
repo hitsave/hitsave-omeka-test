@@ -5,7 +5,7 @@ Local Omeka S on port **8088** for QA. Packaging and upload run in [**hitsave-ar
 | Checkout | Purpose |
 |----------|---------|
 | **This repo** (`hitsave-omeka-test`) | Test Omeka + MariaDB |
-| [**hitsave-archiver**](https://github.com/hitsave/hitsave-archiver) | Postgres ledger, ClamAV, ingest worker, omeka-uploader |
+| [**hitsave-archiver**](https://github.com/hitsave/hitsave-archiver) | Postgres ledger, ClamAV, ingest worker, omeka-catalog |
 | [**hitsave-archiver-config**](https://github.com/hitsave/hitsave-archiver-config) (private) | API keys, Wasabi/Moby creds |
 
 ---
@@ -64,10 +64,10 @@ docker compose run --rm ingest-worker /config/preservation/game.yml
 
 Writes a BagIt directory under `$HOST_OUTPUT/bag/…` and syncs an unpacked prefix to Wasabi.
 
-### 3. Upload to test Omeka
+### 3. Register DIP in test Omeka
 
 ```bash
-docker compose run --rm omeka-uploader game-name /config/preservation/game.yml
+docker compose run --rm omeka-catalog game-name /config/preservation/game.yml
 ```
 
 Creates an Omeka item + `omeka_dip_package` media pointing at the Wasabi prefix (no multipart tar upload).
