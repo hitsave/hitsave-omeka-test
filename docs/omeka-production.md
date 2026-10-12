@@ -8,9 +8,8 @@ This document captures how [archive.hitsave.org](https://archive.hitsave.org) is
 |---|------------|----------------------|
 | URL | https://archive.hitsave.org | `config/omeka-test/settings.yaml` → `omeka.public_url` (e.g. `http://127.0.0.1:8088`) |
 | Site slug | `start` | `hitsave-test` (configurable) |
-| DIP browse | Legacy: many native media + LightGallery; **target:** one DIP `.tar` per game via **OmekaDipViewer** | OmekaDipViewer only |
+| DIP browse | One **OmekaDipViewer** package per game (Wasabi S3 BagIt) | Same module; S3 overlay in test |
 | ARKs | **Ark** module active | **Common + Ark** in test image (Ark 3.5.17; prod 3.5.15), NAAN **78322**, internal ids; resolver URL **`/s/{site_slug}/ark:/…`** (prod serves **`/ark:/…`** at host root) |
-| Archivematica Connector | Was used historically; **not** required for DipViewer | Removed from Docker image and install scripts |
 
 Theme/nav/template for test can be mirrored from prod with `scripts/pull-omeka-prod-mirror.py` and `scripts/apply-omeka-prod-mirror.php` (output under gitignored `config/omeka-test/mirror/`; copy `omeka-prod-source.yaml.example` first).
 
@@ -46,9 +45,9 @@ In Ark settings this corresponds to:
 |----------|---------|--------|
 | Item | `ark:/78322/9677` | Name segment = Omeka `o:id` |
 | Item set | `ark:/78322/1459` | e.g. Press and Marketing Materials |
-| Media (native, legacy) | `ark:/78322/9677/9678` | One **component** level: Omeka media id under item **9677** |
-| DIP file (target) | `ark:/78322/6282/198/f1` | **Component path** under item Name **6282** (see below) |
-| DIP derivative (target) | `ark:/78322/6282/198/f1.access` | **Variant path** after the file component (thumbnail, stream, etc.) |
+| Media (native attachment) | `ark:/78322/9677/9678` | One **component** level: Omeka media id under item **9677** |
+| DIP file | `ark:/78322/6282/198/f1` | **Component path** under item Name **6282** (see below) |
+| DIP derivative | `ark:/78322/6282/198/f1.access` | **Variant path** after the file component (thumbnail, stream, etc.) |
 
 Items expose the ARK in **`dcterms:identifier`** (literal). The public NAAN policy page is served at [https://archive.hitsave.org/ark:/78322](https://archive.hitsave.org/ark:/78322).
 
@@ -60,7 +59,7 @@ We use two qualifier mechanisms from the ARK spec ([ARK spec](https://arks.org/a
 
 | Mechanism | Separator | Use on Hit Save |
 |-----------|-----------|-----------------|
-| **Component path** | `/` | Containment: item → DIP package (media) → logical file inside the tar |
+| **Component path** | `/` | Containment: item → DIP package (media) → logical file inside the BagIt `data/` tree |
 | **Variant path** | `.` | Same logical file, different delivery: original bytes vs thumbnail vs streaming access copy |
 
 **Name** is always the Omeka **item** `o:id` (the game / accession record). **Do not** mint separate Names for DIP files.
@@ -76,9 +75,9 @@ We use two qualifier mechanisms from the ARK spec ([ARK spec](https://arks.org/a
 
 **Component path rules:**
 
-- Segment **`{dip_media_id}`** = Omeka media row holding the `.tar` DIP (`omeka_dip_package`).
-- Segment **`{file_key}`** = stable key from the DIP index (METS/object path), same as in `/omeka-dip/file/{media_id}/{file_key}`.
-- **Legacy native media** (pre–DipViewer expansion) keeps a **single** component: `ark:/78322/{item_id}/{media_id}`.
+- Segment **`{dip_media_id}`** = Omeka media row for the package (`omeka_dip_package`).
+- Segment **`{file_key}`** = stable key from `metadata/inventory.json`, same as in `/omeka-dip/file/{media_id}/{file_key}`.
+- **Native file media** on an item uses a **single** component: `ark:/78322/{item_id}/{media_id}`.
 
 **Variant path rules:**
 
@@ -97,7 +96,7 @@ We use two qualifier mechanisms from the ARK spec ([ARK spec](https://arks.org/a
 
 Example (test stack): `http://127.0.0.1:8088/s/hitsave-test/ark:/78322/201/202/f0` → `screenshot.jpg` bytes (same as `/omeka-dip/file/202/f0`). Variants use the ARK variant suffix, e.g. `…/f2.access` for a streaming copy.
 
-Production still serves **`/ark:/…`** at the host root; test uses the **`/s/{site_slug}/ark:`** prefix until root routing matches prod. Item and single-segment media ARKs remain the Ark module; in-tar files use the **four-segment** path above (not a second minted Name).
+Production still serves **`/ark:/…`** at the host root; test uses the **`/s/{site_slug}/ark:`** prefix until root routing matches prod. Item and single-segment media ARKs remain the Ark module; in-package files use the **four-segment** path above (not a second minted Name).
 
 ### Resolution
 
@@ -136,7 +135,7 @@ Omeka S stores **`o:is_public` separately** on each item and each media record. 
 
 ### What ingest does today
 
-`scripts/upload-dip-omeka-api.py` sets the **same** `o:is_public` on the item and the nested DIP media in one multipart create (see `create_item_with_dip`).
+`scripts/upload-dip-omeka-api.py` sets the **same** `o:is_public` on the item and the DIP media row (API JSON create, no file upload).
 
 ### Gaps to close before / during prod DIP rollout
 
@@ -148,9 +147,9 @@ Omeka S stores **`o:is_public` separately** on each item and each media record. 
 ## OmekaDipViewer (DIP browse)
 
 - **Module:** [`omeka-dip-viewer`](https://github.com/hitsave/omeka-dip-viewer) → `modules/OmekaDipViewer`; ingester **“DIP package (browse in place)”** (`omeka_dip_package` renderer).
-- **Does not depend** on Archivematica Connector; METS-in-`.tar` parsing is internal.
+- Indexes files from **`metadata/inventory.json`** on Wasabi; streams payload bytes from the bag prefix.
 - **Site layout:** carousel/video full width; package file tree moved to the right column beside metadata (`dip-layout.js` + theme `mediaList` in `full_width_main` / `main` / `right`).
-- **Module upgrades:** bump `config/module.ini` version and run `scripts/ensure-omeka-dip-viewer-upgrade.php` after code changes (syncs DB version, clears opcache, deactivates removed modules such as legacy HitSaveDipViewer / Connector if still marked active in MariaDB).
+- **Module upgrades:** bump `config/module.ini` version and run `scripts/ensure-omeka-dip-viewer-upgrade.php` after code changes (syncs DB version, clears opcache).
 
 Production **resource page blocks** (present in local mirror output `config/omeka-test/mirror/prod-archive.yaml` after a prod pull):
 
@@ -182,10 +181,3 @@ Press and Marketing Materials item set: prod **`o:id` 1459**; test stack resolve
 | `scripts/apply-omeka-prod-mirror.php` | Apply mirrored pages/theme; **replaces** pages by slug (avoids duplicate blocks on re-run) |
 | `scripts/pull-omeka-prod-mirror.py` | Pull site/pages/template from prod API into gitignored `config/omeka-test/mirror/` |
 
----
-
-## Archivematica Connector (deprecated for this path)
-
-**OmekaDipViewer** replaces “expand DIP into hundreds of native media rows” for new press ingest. The upstream **ArchivematicaConnector** Omeka module is **not** installed in the test Docker image and is **not** a dependency of DipViewer. New ingest uses **E-ARK DIP** `.tar` packages from `scripts/build-dip-e-ark.py` (CSIP METS + representations); only the **Omeka import** path changed.
-
-Optional research on full Archivematica + Connector import remains in `plan.md` §14 (deferred).
