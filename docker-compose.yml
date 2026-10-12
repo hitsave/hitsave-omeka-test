@@ -26,9 +26,9 @@ services:
     ports:
       - "8088:8080"
     environment:
-      client_max_body_size: 1024M
-      upload_max_filesize: 1024M
-      post_max_size: 1024M
+      client_max_body_size: 8192M
+      upload_max_filesize: 8192M
+      post_max_size: 8192M
     volumes:
       - ./config/omeka-test/local.config.php:/var/www/html/config/local.config.php:ro
       - ./config/omeka-test/settings.yaml:/config/settings.yaml:ro

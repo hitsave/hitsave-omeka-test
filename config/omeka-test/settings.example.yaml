@@ -53,10 +53,15 @@ site:
 
 # Omeka DIP Viewer: configure in Omeka admin (Modules → Omeka DIP Viewer), not here.
 
+# Press BagIt items: bytes live on Wasabi (OmekaDipViewer dip_storage=wasabi-s3 +
+# media.data.package_storage_prefix). Omeka MariaDB holds metadata only.
+# Render modules/OmekaDipViewer/config/dip-s3.config.php from archiver ingest + Wasabi creds:
+#   scripts/shell/render-dip-s3-config.py
+# Endpoint/region must match the bucket (see hitsave-archiver preservation/ingest.yaml).
 storage:
   aip:
     backend: s3
-    endpoint: https://s3.wasabisys.com
-    region: us-east-1
-    bucket: your-aip-bucket-name
+    endpoint: https://s3.us-east-2.wasabisys.com
+    region: us-east-2
+    bucket: hitsave-incoming
     prefix: press-material/

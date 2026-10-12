@@ -35,6 +35,7 @@ Copy `config/omeka-test/omeka-prod-source.yaml.example` → `omeka-prod-source.y
 
 - [docs/config-contract.md](docs/config-contract.md) — which YAML owns what (SSOT)
 - [docs/build-real-dip.md](docs/build-real-dip.md) — archiver ingest + omeka-uploader
+- [docs/dip-wasabi-s3-direct.md](docs/dip-wasabi-s3-direct.md) — Wasabi S3 for OmekaDipViewer (no FUSE)
 - [docs/omeka-production.md](docs/omeka-production.md) — production vs test, ARKs, visibility
 - [docs/archive-theme-1plus4.md](docs/archive-theme-1plus4.md) — theme layout notes
 
@@ -42,6 +43,6 @@ Copy `config/omeka-test/omeka-prod-source.yaml.example` → `omeka-prod-source.y
 
 | Repo | Role |
 |------|------|
-| [hitsave-archiver](https://github.com/hitsave/hitsave-archiver) | E-ARK ingest, Omeka REST uploader |
+| [hitsave-archiver](https://github.com/hitsave/hitsave-archiver) | BagIt ingest, Omeka REST uploader |
 | [omeka-dip-viewer](https://github.com/hitsave/omeka-dip-viewer) | DIP browse module (baked into Omeka image) |
 | [hitsave-archive-theme](https://github.com/hitsave/hitsave-archive-theme) | Foundation overlay theme |

@@ -1,0 +1,6 @@
+# Direct Wasabi S3 for OmekaDipViewer (no rclone FUSE). Requires dip-s3.config.php on the host.
+services:
+  omeka:
+    volumes:
+      - ${OMEKA_DIP_VIEWER_MODULE:-../omeka-dip-viewer}:/var/www/html/volume/modules/OmekaDipViewer:ro
+      - ${DIP_S3_CONFIG:-../omeka-dip-viewer/config/dip-s3.config.php}:/var/www/html/volume/modules/OmekaDipViewer/config/dip-s3.config.php:ro
