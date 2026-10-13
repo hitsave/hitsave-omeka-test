@@ -29,9 +29,10 @@ docker compose up -d postgres clamav
 ```bash
 cd ~/hitsave-omeka-test
 ./scripts/ensure-local-config.sh
-python3 scripts/shell/render-dip-s3-config.py \
-  --wasabi-credentials "$HITSAVE_PRIVATE_CONFIG/secrets/wasabi-credentials.yaml" \
-  --output ../omeka-dip-viewer/config/dip-s3.config.php
+cp -n config/omeka-test/dip-s3.yaml.example config/omeka-test/dip-s3.yaml
+cp -n config/omeka-test/dip-s3-credentials.yaml.example config/omeka-test/dip-s3-credentials.yaml
+# Edit dip-s3.yaml and dip-s3-credentials.yaml (Omeka read-only Wasabi user).
+python3 scripts/shell/render-dip-s3-config.py
 docker compose -f docker-compose.yml -f docker-compose.s3-direct.yml build omeka
 ./scripts/shell/run-omeka-test.sh
 ```

@@ -1,0 +1,10 @@
+# OmekaDipViewer Wasabi settings — Omeka stack only (not hitsave-archiver ingest).
+# Copy to dip-s3.yaml (gitignored) and render dip-s3.config.php:
+#   python3 scripts/shell/render-dip-s3-config.py
+
+bucket: hitsave-press-material
+endpoint: https://s3.us-east-2.wasabisys.com
+region: us-east-2
+
+# Read-only Omeka user keys (copy dip-s3-credentials.yaml.example → dip-s3-credentials.yaml).
+credentials_file: dip-s3-credentials.yaml
