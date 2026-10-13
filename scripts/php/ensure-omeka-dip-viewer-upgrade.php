@@ -11,6 +11,12 @@ use Omeka\Entity\User;
 
 require '/var/www/html/bootstrap.php';
 
+$moduleIni = '/var/www/html/modules/OmekaDipViewer/config/module.ini';
+if (!is_readable($moduleIni)) {
+    fwrite(STDERR, "Missing {$moduleIni} (bind-mounted OmekaDipViewer must include config/module.ini).\n");
+    exit(1);
+}
+
 $application = Omeka\Mvc\Application::init(
     require OMEKA_PATH . '/application/config/application.config.php'
 );

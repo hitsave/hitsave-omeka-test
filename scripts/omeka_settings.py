@@ -44,7 +44,7 @@ def load_settings(path: Path | None = None) -> dict:
 
 
 def resolve_api_config(settings: dict | None = None) -> dict:
-    """REST API settings for local Python tools (align with hitsave-archiver omeka-uploader.yaml)."""
+    """REST API settings for local Python tools (align with hitsave-archiver omeka-catalog.yaml)."""
     settings = settings if settings is not None else load_settings()
     omeka = settings.get("omeka") or {}
     api = dict(settings.get("api") or {})

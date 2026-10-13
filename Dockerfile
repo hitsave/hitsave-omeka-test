@@ -28,8 +28,12 @@ RUN git clone --depth 1 --branch "${FOUNDATION_REF}" \
 
 COPY scripts/docker-entrypoint-99-dip-viewer-upgrade.sh /docker-entrypoint-init.d/99-dip-viewer-upgrade.sh
 COPY scripts/php/ensure-omeka-dip-viewer-upgrade.php /scripts/ensure-omeka-dip-viewer-upgrade.php
+COPY config/nginx/dip-stampede-guard.http.conf /etc/nginx/dip-stampede-guard.http.conf
+COPY config/nginx/dip-stampede-guard.server.conf /etc/nginx/server-conf.d/dip-stampede-guard.conf
+COPY config/php-fpm/dip.conf /etc/php84/php-fpm.d/dip.conf
 
-RUN sed -i -E 's/client_max_body_size[[:space:]]+[0-9]+[mM]/client_max_body_size 1024M/' /etc/nginx/nginx.conf \
+RUN sed -i -E 's/client_max_body_size[[:space:]]+[0-9]+[mM]/client_max_body_size 8192M/' /etc/nginx/nginx.conf \
+    && sed -i '/^http {/a\\    include /etc/nginx/dip-stampede-guard.http.conf;' /etc/nginx/nginx.conf \
     && chmod +x /docker-entrypoint-init.d/99-dip-viewer-upgrade.sh \
     && chown -R nobody:nobody /var/www/html/volume/modules \
       /var/www/html/volume/themes/HitSaveArchive /var/www/html/volume/modules/Ark/vendor
