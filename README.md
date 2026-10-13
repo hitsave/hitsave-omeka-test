@@ -46,3 +46,7 @@ Copy `config/omeka-test/omeka-prod-source.yaml.example` → `omeka-prod-source.y
 | [hitsave-archiver](https://github.com/hitsave/hitsave-archiver) | BagIt ingest, Omeka catalog registration |
 | [omeka-dip-viewer](https://github.com/hitsave/omeka-dip-viewer) | DIP browse module (baked into Omeka image) |
 | [hitsave-archive-theme](https://github.com/hitsave/hitsave-archive-theme) | Foundation overlay theme |
+
+## License
+
+Copyright 2026 Hit Save! Licensed under the [Apache License, Version 2.0](LICENSE).
