@@ -4,6 +4,8 @@ config/omeka-test/settings.yaml
 config/omeka-test/settings.local.yaml
 config/omeka-test/database.ini
 config/omeka-test/local.config.php
+config/omeka-test/dip-s3.yaml
+config/omeka-test/dip-s3-credentials.yaml
 config/omeka-test/mirror/*
 !config/omeka-test/mirror/README.md
 config/omeka-test/omeka-prod-source.yaml
