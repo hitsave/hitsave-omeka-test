@@ -96,8 +96,8 @@ def main() -> None:
     bucket = str(dip_s3.get("bucket") or "").strip()
     endpoint = str(dip_s3.get("endpoint") or "").strip()
     region = str(dip_s3.get("region") or "").strip()
-    if not bucket or not endpoint or not region:
-        raise SystemExit("dip-s3.yaml must set bucket, endpoint, and region")
+    if not endpoint or not region:
+        raise SystemExit("dip-s3.yaml must set endpoint and region (bucket is optional)")
 
     key, secret = load_credentials(dip_s3, base=dip_s3_path.parent)
 

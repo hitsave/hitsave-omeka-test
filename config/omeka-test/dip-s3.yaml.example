@@ -2,7 +2,9 @@
 # Copy to dip-s3.yaml (gitignored) and render dip-s3.config.php:
 #   python3 scripts/shell/render-dip-s3-config.py
 
-bucket: hitsave-press-material
+# Optional default when media only has package_storage_prefix (no s3:// URI).
+# Normally the bucket comes from dip_wasabi_uri on each DIP media (IAM allows listed buckets).
+# bucket: hitsave-press-material
 endpoint: https://s3.us-east-2.wasabisys.com
 region: us-east-2
 

@@ -50,22 +50,55 @@ def main() -> None:
 
     site = get_json(session, f"{base}/sites/{prod['site_id']}", params)
     page_id_to_slug: dict[int, str] = {}
-    rt = get_json(session, f"{base}/resource_templates/{prod['press_resource_template_id']}", params)
-    rc_id = rt["o:resource_class"]["o:id"]
-    rc = get_json(session, f"{base}/resource_classes/{rc_id}", params)
+    def template_spec(rt_row: dict) -> dict:
+        rc_id = (rt_row.get("o:resource_class") or {}).get("o:id")
+        rc_term = None
+        if rc_id:
+            rc = get_json(session, f"{base}/resource_classes/{rc_id}", params)
+            rc_term = rc["o:term"]
+        template_properties = []
+        for row in rt_row.get("o:resource_template_property", []):
+            pid = row["o:property"]["o:id"]
+            prop = property_term(session, base, params, pid)
+            template_properties.append(
+                {
+                    "term": prop["term"],
+                    "alternate_label": row.get("o:alternate_label"),
+                    "required": bool(row.get("o:is_required")),
+                    "private": bool(row.get("o:is_private")),
+                    "data_type": row.get("o:data_type") or [],
+                }
+            )
+        return {
+            "prod_id": rt_row["o:id"],
+            "label": rt_row["o:label"],
+            "resource_class_term": rc_term,
+            "properties": template_properties,
+        }
 
-    template_properties = []
-    for row in rt.get("o:resource_template_property", []):
-        pid = row["o:property"]["o:id"]
-        prop = property_term(session, base, params, pid)
-        template_properties.append(
-            {
-                "term": prop["term"],
-                "alternate_label": row.get("o:alternate_label"),
-                "required": bool(row.get("o:is_required")),
-                "data_type": row.get("o:data_type") or [],
-            }
+    all_templates: list[dict] = []
+    page = 1
+    while True:
+        batch = get_json(
+            session,
+            f"{base}/resource_templates",
+            {**params, "page": page, "per_page": 100},
         )
+        if not batch:
+            break
+        for rt_summary in batch:
+            rt_full = get_json(
+                session,
+                f"{base}/resource_templates/{rt_summary['o:id']}",
+                params,
+            )
+            all_templates.append(template_spec(rt_full))
+        page += 1
+
+    press_id = int(prod["press_resource_template_id"])
+    rt = get_json(session, f"{base}/resource_templates/{press_id}", params)
+    press_spec = template_spec(rt)
+    template_properties = press_spec["properties"]
 
     pages = []
     for ref in site.get("o:page", []):
@@ -130,11 +163,8 @@ def main() -> None:
                 }
             },
         },
-        "resource_template": {
-            "label": rt["o:label"],
-            "resource_class_term": rc["o:term"],
-            "properties": template_properties,
-        },
+        "resource_template": press_spec,
+        "resource_templates": all_templates,
         "site_pages": pages,
         "apply_notes": [
             "curation:location (Storage Box) skipped on test unless Curation vocabulary is installed.",
@@ -150,7 +180,7 @@ def main() -> None:
     print(f"Wrote {OUT}")
     print(f"Wrote {OUT_JSON}")
     print(f"  site theme: {mirror['site']['theme']}")
-    print(f"  template: {mirror['resource_template']['label']} ({len(template_properties)} properties)")
+    print(f"  templates: {len(all_templates)} (press: {press_spec['label']}, {len(template_properties)} properties)")
     print(f"  pages: {len(pages)}")
 
 

@@ -2,6 +2,7 @@
 # Requires secrets/omeka-api-credentials-prod.yaml in private config.
 production:
   base_url: https://archive.example.org/api
+  # Path relative to hitsave-omeka-test repo root (often ../hitsave-archiver-config/secrets/omeka-api-credentials-prod.yaml)
   credentials_file: secrets/omeka-api-credentials-prod.yaml
   site_slug: start
   site_id: 0

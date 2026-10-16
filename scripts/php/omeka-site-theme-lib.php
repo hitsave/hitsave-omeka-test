@@ -99,6 +99,7 @@ function archiveThemeFamilySettings(string $path): array
         'support_url' => 'hitsave_support_url',
         'get_involved_url' => 'hitsave_get_involved_url',
         'archive_label' => 'hitsave_archive_label',
+        'archive_home_url' => 'hitsave_archive_home_url',
     ];
     $out = [];
     foreach ($map as $yamlKey => $settingKey) {
@@ -150,6 +151,7 @@ function applyThemeSettings($themes, $siteSettings, $blockLayoutManager, int $si
         'hitsave_support_url' => $settings['hitsave_support_url'] ?? null,
         'hitsave_get_involved_url' => $settings['hitsave_get_involved_url'] ?? null,
         'hitsave_archive_label' => $settings['hitsave_archive_label'] ?? null,
+        'hitsave_archive_home_url' => $settings['hitsave_archive_home_url'] ?? null,
         'hitsave_hero_title' => $settings['hitsave_hero_title'] ?? null,
         'hitsave_hero_tagline' => $settings['hitsave_hero_tagline'] ?? null,
         'hitsave_homepage_slug' => $settings['hitsave_homepage_slug'] ?? null,

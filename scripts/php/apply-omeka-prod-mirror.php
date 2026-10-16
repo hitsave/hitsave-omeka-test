@@ -8,6 +8,7 @@ use Omeka\Entity\User;
 
 require '/var/www/html/bootstrap.php';
 require __DIR__ . '/omeka-site-theme-lib.php';
+require __DIR__ . '/omeka-resource-template-sync-lib.php';
 
 $mirrorPath = '/config/omeka-test/mirror/prod-archive.json';
 $sourcePath = '/config/omeka-test/omeka-prod-source.yaml';
@@ -59,7 +60,7 @@ if (!$sites) {
     ], [], ['isPartial' => true]);
 }
 
-ensurePressTemplate($api, $mirror['resource_template']);
+syncResourceTemplatesFromMirror($api, $mirror);
 $themeSettings = array_merge(
     hitsaveDefaultThemeSettings(),
     archiveThemeFamilySettings('/config/archive-theme.yml'),
@@ -101,57 +102,6 @@ function buildNavigation(array $navigation, array $slugToId): array
         $out[] = $entry;
     }
     return $out;
-}
-
-function propertyId($api, string $term): ?int
-{
-    $rows = $api->search('properties', ['term' => $term])->getContent();
-    return $rows ? (int) $rows[0]->id() : null;
-}
-
-function resourceClassId($api, string $term): ?int
-{
-    $rows = $api->search('resource_classes', ['term' => $term])->getContent();
-    return $rows ? (int) $rows[0]->id() : null;
-}
-
-function ensurePressTemplate($api, array $spec): void
-{
-    $label = $spec['label'] ?? 'Press and Marketing Material';
-    $existing = $api->search('resource_templates', ['label' => $label])->getContent();
-    $classTerm = $spec['resource_class_term'] ?? 'dctype:Collection';
-    $classId = resourceClassId($api, $classTerm);
-    $props = [];
-    foreach ($spec['properties'] ?? [] as $row) {
-        $term = $row['term'] ?? '';
-        if ($term === 'curation:location') {
-            continue;
-        }
-        $pid = propertyId($api, $term);
-        if (!$pid) {
-            continue;
-        }
-        $dataTypes = $row['data_type'] ?? [];
-        if ($dataTypes && str_starts_with((string) ($dataTypes[0] ?? ''), 'customvocab:')) {
-            $dataTypes = [];
-        }
-        $props[] = [
-            'o:property' => ['o:id' => $pid],
-            'o:alternate_label' => $row['alternate_label'] ?? null,
-            'o:is_required' => !empty($row['required']),
-            'o:data_type' => $dataTypes,
-        ];
-    }
-    $payload = [
-        'o:label' => $label,
-        'o:resource_class' => $classId ? ['o:id' => $classId] : null,
-        'o:resource_template_property' => $props,
-    ];
-    if ($existing) {
-        $api->update('resource_templates', $existing[0]->id(), $payload, [], ['isPartial' => true]);
-    } else {
-        $api->create('resource_templates', $payload);
-    }
 }
 
 function syncPages($api, int $siteId, array $pages): array

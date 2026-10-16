@@ -11,6 +11,7 @@ family:
   support_url: https://hitsave.org/support-us/
   get_involved_url: https://forms.gle/uwnWEPmyrpgiz3AGA
   archive_label: The Archive
+  archive_home_url: https://archive.hitsave.org
 
 browse:
   # Foundation theme setting: full | fadeout | ellipsis (4 lines)
@@ -28,4 +29,4 @@ discovery_tiles:
     path: page/press-material
   - label: VHS tapes
     hint: Full-text search
-    path: item?fulltext_search=VHS
+    path: index/search?fulltext_search=VHS

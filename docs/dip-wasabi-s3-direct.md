@@ -17,14 +17,14 @@ Steps:
 2. **Access keys** — either extend the existing IAM user policy with `List/Get/Put` on the new bucket, or create `wasabi-omeka-read.yaml` (read-only for prod Omeka) plus writer key on the archiver host.
 3. **Archiver** — in `hitsave-archiver/config/preservation/ingest.yaml` set `wasabi.buckets.press_material` and `wasabi.buckets.dumps` (required; no fallback bucket).
 4. **Omeka** — separate **read-only** Wasabi user (see JSON policy in ops docs); do **not** reuse archiver ingest keys.
-5. **Omeka config** — copy examples → local files, render PHP (below). Bucket name must match where press bags are uploaded (`wasabi.buckets.press_material` in archiver `ingest.yaml`).
+5. **Omeka config** — copy examples → local files, render PHP (below). `dip-s3.yaml` holds **endpoint + read-only credentials** only; each DIP media’s `dip_wasabi_uri` (`s3://bucket/prefix/…`) selects the bucket. Optional `bucket` in yaml is a fallback for legacy prefix-only media.
 6. **Re-ingest** — after bucket changes, reset ledger + re-upload so preflight hits the correct bucket.
 
 ## One-time setup (Omeka-only S3)
 
 1. Copy and edit (both gitignored locally):
 
-   - `config/omeka-test/dip-s3.yaml.example` → `dip-s3.yaml` (`bucket`, `endpoint`, `region`)
+   - `config/omeka-test/dip-s3.yaml.example` → `dip-s3.yaml` (`endpoint`, `region`; optional `bucket`)
    - `config/omeka-test/dip-s3-credentials.yaml.example` → `dip-s3-credentials.yaml` (Omeka read-only keys)
 
 2. Render module config:
@@ -56,7 +56,7 @@ After ingest and `register-dip-omeka-api.py`:
 | `package_storage_prefix` | `press-material/F/{package_id}` |
 | `dip_wasabi_uri` | `s3://hitsave-press-material/press-material/F/{package_id}/` |
 
-DipViewer loads `metadata/inventory.json` and streams payload files from that prefix.
+DipViewer parses **bucket and prefix** from `dip_wasabi_uri` (or `package_wasabi_uri`), then loads `metadata/inventory.json` and streams payload files. Wasabi IAM on the Omeka read-only user must allow every bucket referenced by catalog media (e.g. `hitsave-press-material` and `hitsave-dumps`).
 
 ## Verify
 
