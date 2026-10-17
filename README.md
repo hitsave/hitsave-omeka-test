@@ -31,6 +31,10 @@ Copy `config/omeka-test/omeka-prod-source.yaml.example` → `omeka-prod-source.y
 ./scripts/shell/sync-omeka-prod-mirror.sh
 ```
 
+## Agent / Cursor
+
+Glob rules in **`.cursor/rules/`** (Omeka image rebuild vs bind-mounted DIP module, `config/**` SSOT).
+
 ## Docs
 
 - [docs/config-contract.md](docs/config-contract.md) — which YAML owns what (SSOT)

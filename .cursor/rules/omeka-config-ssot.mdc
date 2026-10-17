@@ -1,0 +1,27 @@
+---
+description: Omeka test YAML SSOT — settings.yaml, mirror, no hardcoded slug/port
+globs: config/**
+alwaysApply: false
+---
+
+# Omeka test config contract
+
+SSOT: **`docs/config-contract.md`**.
+
+| Topic | File |
+|-------|------|
+| Admin, DB, URL, site slug | **`config/omeka-test/settings.yaml`** (+ optional `settings.local.yaml`) |
+| Rendered compose env | **`sync-docker-config.py`** → `generated.env` |
+| Prod mirror | **`omeka-prod-source.yaml`** (from example, gitignored) |
+
+## Do
+
+- Read **`settings.yaml`** via **`scripts/omeka_settings.py`** in new scripts — do not hardcode `hitsave-test` or **`8088`**.
+- Keep **`mirror.target_site_slug`** aligned with **`omeka.site_slug`** when renaming sites.
+
+## Do not
+
+- Commit **`omeka-prod-source.yaml`**, **`dip-s3-credentials.yaml`**, or other filled secrets (use `.example` templates).
+- Duplicate API identity in deprecated **`omeka-api.yaml`** — use **`settings.yaml` → `api:`**.
+
+Credentials live in private **hitsave-archiver-config**; archiver uploader SSOT is documented in the config-contract cross-repo table.
