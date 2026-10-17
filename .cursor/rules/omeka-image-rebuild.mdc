@@ -1,0 +1,23 @@
+---
+description: Omeka test stack — rebuild image after Dockerfile/theme COPY changes
+globs: Dockerfile,docker-compose*.yml,nginx-client-max-body.conf,config/archive-theme.yml
+alwaysApply: false
+---
+
+# Omeka test — image vs bind-mount
+
+**Baked into image:** `Dockerfile`, theme build (`scripts/build-hitsave-archive-theme.sh` if used), nginx limits copied at build time.
+
+**Bind-mounted (no image rebuild):** **OmekaDipViewer** module tree — module-only edits need container reload/recreate, not full theme rebuild.
+
+After changing anything **COPY**’d into the Omeka image, **run before finishing**:
+
+```bash
+bash scripts/shell/redeploy-omeka-test.sh
+```
+
+Optional: `--no-mirror`. Do **not** rely on `docker compose restart` alone.
+
+**Verify:** HTTP fetch (e.g. intro contains `hitsave-hub` or `hitsave-site-chrome`).
+
+**PHP/Omeka:** `docker compose exec omeka php …` or stack scripts — not bare host `python`/`php` for Omeka runtime.
