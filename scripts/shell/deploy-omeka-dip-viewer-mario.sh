@@ -108,6 +108,18 @@ docker exec "\$OID" tar -C /var/www/html/volume/modules -czf - OmekaDipViewer > 
 echo "backup: \$BACKUP (\$(du -h "\$BACKUP" | cut -f1))"
 rm -rf /tmp/odv-new && mkdir -p /tmp/odv-new && tar -xzf /tmp/omeka-dip-viewer-deploy.tar.gz -C /tmp/odv-new
 test -f /tmp/odv-new/OmekaDipViewer/config/module.ini
+# Pre-check on the target's own PHP BEFORE touching the live module: lint every PHP file, and load
+# the bundled autoloader if one ships (catches Composer platform requirements). Abort on any error.
+docker exec -u 0 "\$OID" rm -rf /tmp/odv-stage
+docker cp /tmp/odv-new/OmekaDipViewer "\$OID:/tmp/odv-stage"
+LINT="\$(docker exec "\$OID" sh -c 'find /tmp/odv-stage -name "*.php" -not -path "*/vendor/*" -exec php -l {} \; 2>&1 | grep -v "^No syntax errors"' || true)"
+if [ -n "\$LINT" ]; then echo "pre-check failed (php -l):" >&2; echo "\$LINT" >&2; docker exec -u 0 "\$OID" rm -rf /tmp/odv-stage; exit 1; fi
+if docker exec "\$OID" test -f /tmp/odv-stage/vendor/autoload.php; then
+  docker exec "\$OID" php -r 'require "/tmp/odv-stage/vendor/autoload.php";' \
+    || { echo "pre-check failed: bundled vendor/ does not load on this PHP" >&2; docker exec -u 0 "\$OID" rm -rf /tmp/odv-stage; exit 1; }
+fi
+docker exec -u 0 "\$OID" rm -rf /tmp/odv-stage
+echo "pre-check: \$(docker exec "\$OID" php -r 'echo PHP_VERSION;') lint ok"
 # Keep the server's own S3 config (not in git).
 docker exec "\$OID" sh -c 'test -f $MODULE_DIR_IN_CONTAINER/config/dip-s3.config.php' \
   && docker cp "\$OID:$MODULE_DIR_IN_CONTAINER/config/dip-s3.config.php" /tmp/odv-new/OmekaDipViewer/config/dip-s3.config.php
@@ -148,11 +160,17 @@ case "${1:-}" in
   ""|-h|--help) sed -n 2,16p "$0"; exit 0 ;;
   *)
     SRC="$(realpath "$1")"
-    [[ -f "$SRC/config/module.ini" && -d "$SRC/vendor" ]] || die "$SRC is not a built module checkout (needs config/module.ini and vendor/)"
+    [[ -f "$SRC/config/module.ini" ]] || die "$SRC is not a module checkout (needs config/module.ini)"
     WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
     mkdir -p "$WORK/OmekaDipViewer"
     (cd "$SRC" && git archive HEAD) | tar -x -C "$WORK/OmekaDipViewer"
-    cp -a "$SRC/vendor" "$WORK/OmekaDipViewer/"
+    # Production runs the module WITHOUT vendor/: the AWS SDK comes from the AnyCloud module, and a
+    # locally built vendor/ may target a newer PHP (composer.lock pins symfony/filesystem 8.x, PHP 8.4)
+    # than production's 8.3. Ship vendor/ only on request.
+    if [[ "${DEPLOY_WITH_VENDOR:-0}" == 1 ]]; then
+      [[ -d "$SRC/vendor" ]] || die "DEPLOY_WITH_VENDOR=1 but $SRC/vendor is missing"
+      cp -a "$SRC/vendor" "$WORK/OmekaDipViewer/"
+    fi
     echo "==> deploying $(grep -m1 '^version' "$SRC/config/module.ini") from $(git -C "$SRC" rev-parse --short HEAD)"
     tar -C "$WORK" -czf "$WORK/omeka-dip-viewer-deploy.tar.gz" OmekaDipViewer
     echo "==> preflight"; preflight
