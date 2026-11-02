@@ -10,13 +10,21 @@
 #
 # Steps: preflight (host, stack, current module version) -> back up the current module directory
 # on mario -> upload and replace the module -> upgrade ONLY OmekaDipViewer through Omeka's module
-# manager (records the new version; without it Omeka deactivates the module) -> restart omeka
-# (OPcache) -> verify the module is active at the expected version and a DIP file URL serves.
+# manager (records the new version; without it Omeka deactivates the module) -> verify the module
+# is active at the expected version and the site serves. No restart: production's OPcache
+# revalidates file timestamps every 2s (validate_timestamps=On, revalidate_freq=2).
+#
+# Production layout (2026-11-02): Komodo deploys the stack from hitsave/docker-inventory
+# (mario/omeka/compose.yaml); container "omeka"; /opt/stacks/omeka/volume is bind-mounted at
+# /var/www/html/volume, so the module lives on the host and survives container recreation. The
+# script addresses the container by name and never runs docker compose (that would use a stale
+# copy of the compose file and compete with Komodo).
 set -euo pipefail
 
 MARIO="${MARIO_HOST:-mario}"
 SSH_USER="${MARIO_SSH_USER:-root}"
-STACK="${MARIO_OMEKA_STACK:-/opt/stacks/hitsave-omeka}"
+STACK="${MARIO_OMEKA_STACK:-/opt/stacks/omeka}"          # backups go to $STACK/backups
+OMEKA_CONTAINER="${MARIO_OMEKA_CONTAINER:-omeka}"
 TS_CONTAINER="${HITSAVE_TS_CONTAINER:-hitsave-ts}"
 SSH_KEY="${MARIO_SSH_KEY:-}"           # empty = Tailscale SSH (tailnet identity, no key)
 VERIFY_URL="${VERIFY_URL:-https://archive.hitsave.org/ark:/78322/27722}"
@@ -25,7 +33,8 @@ MODULE_DIR_IN_CONTAINER=/var/www/html/volume/modules/OmekaDipViewer
 die() { echo "ERROR: $*" >&2; exit 1; }
 
 # MARIO_HOST=local rehearses every remote step on this machine (e.g. against the local
-# hitsave-omeka-test stack with MARIO_OMEKA_STACK=/path/to/hitsave-omeka-test); no tailnet needed.
+# hitsave-omeka-test stack with MARIO_OMEKA_STACK=/path/to/hitsave-omeka-test and
+# MARIO_OMEKA_CONTAINER=hitsave-omeka-test-omeka-1); no tailnet needed.
 if [[ "$MARIO" != local ]]; then
   docker inspect -f '{{.State.Running}}' "$TS_CONTAINER" 2>/dev/null | grep -q true \
     || die "$TS_CONTAINER is not running (hitsave-archiver-config/hosts/saturn/tailscale/compose.yaml)"
@@ -53,8 +62,8 @@ preflight() {
   run_ssh <<REMOTE
 set -euo pipefail
 echo "host: \$(hostname)"
-cd "$STACK" && docker compose ps omeka --format '{{.Name}} {{.Status}}'
-OID="\$(docker compose ps -q omeka | head -1)"; test -n "\$OID"
+OID="$OMEKA_CONTAINER"
+docker ps --filter "name=^\$OID\$" --format '{{.Names}} {{.Image}} {{.Status}}' | grep . 
 docker exec "\$OID" sh -c 'grep -m1 "^version" $MODULE_DIR_IN_CONTAINER/config/module.ini'
 df -h "$STACK" | tail -1
 REMOTE
@@ -89,8 +98,8 @@ install_tarball() {   # $1 = tarball path inside /work, $2 = label
   push_file "$tarball" /tmp/omeka-dip-viewer-deploy.tar.gz
   run_ssh <<REMOTE
 set -euo pipefail
-cd "$STACK"
-OID="\$(docker compose ps -q omeka | head -1)"; test -n "\$OID"
+OID="$OMEKA_CONTAINER"
+docker ps --filter "name=^\$OID\$" -q | grep -q .
 TS="\$(date -u +%Y%m%dT%H%M%SZ)"
 mkdir -p "$STACK/backups"
 OLD="\$(docker exec "\$OID" sh -c 'grep -m1 "^version" $MODULE_DIR_IN_CONTAINER/config/module.ini | cut -d\\" -f2')"
@@ -113,17 +122,17 @@ docker cp /tmp/odv-upgrade.php "\$OID:/tmp/odv-upgrade.php"
 if ! docker exec "\$OID" php /tmp/odv-upgrade.php; then
   echo "upgrade failed; restoring previous module" >&2
   docker exec -u 0 "\$OID" sh -c 'rm -rf $MODULE_DIR_IN_CONTAINER && mv ${MODULE_DIR_IN_CONTAINER}.deploying $MODULE_DIR_IN_CONTAINER'
-  docker compose restart omeka; exit 1
+  exit 1
 fi
 docker exec -u 0 "\$OID" sh -c 'rm -rf ${MODULE_DIR_IN_CONTAINER}.deploying /tmp/odv-upgrade.php'
-docker compose restart omeka
+sleep 3   # OPcache revalidate_freq=2: new files are live after this
 rm -rf /tmp/odv-new /tmp/odv-upgrade.php /tmp/omeka-dip-viewer-deploy.tar.gz
 echo "$label: done"
 REMOTE
 }
 
 verify() {
-  sleep 10
+  sleep 2
   local code
   code="$(curl -s -o /dev/null -w '%{http_code}' "$VERIFY_URL")"
   echo "verify $VERIFY_URL -> HTTP $code"
