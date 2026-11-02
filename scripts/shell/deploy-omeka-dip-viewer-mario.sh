@@ -31,11 +31,12 @@ if [[ "$MARIO" != local ]]; then
     || die "$TS_CONTAINER is not running (hitsave-archiver-config/hosts/saturn/tailscale/compose.yaml)"
 fi
 
-# ssh/scp in a throwaway container sharing the tailnet namespace (MagicDNS at 100.100.100.100).
+# ssh/scp in a throwaway container sharing the tailnet namespace (it inherits MagicDNS; Docker
+# rejects --dns together with --network container:).
 remote() {
   local key_mount=()
   if [[ -n "$SSH_KEY" ]]; then key_mount=(-v "$SSH_KEY:/k:ro"); fi
-  docker run --rm -i --network "container:$TS_CONTAINER" --dns 100.100.100.100 "${key_mount[@]}" \
+  docker run --rm -i --network "container:$TS_CONTAINER" "${key_mount[@]}" \
     -v "${WORK:-/tmp}:/work:ro" alpine:3.20 sh -c \
     "apk add -q --no-cache openssh-client >/dev/null && $*" ;
 }
